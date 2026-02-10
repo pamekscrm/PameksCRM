@@ -93,80 +93,63 @@
         // SENİN API LİNKİN
         const API_URL = "https://script.google.com/macros/s/AKfycby6vg7szzK1m5UTCeLC2s8J82dSShpj5HiVmGDu40KKqxlmZShGAoRCoa9j5TbTJeV2Lw/exec";
 
-        // HTML Elementlerini Seçelim
         const loginForm = document.getElementById('loginForm');
         const loginBtn = document.getElementById('loginBtn');
         const spinner = document.getElementById('loadingSpinner');
         const errorMsg = document.getElementById('errorMessage');
-        const loginSection = document.getElementById('loginSection');
-        const dashboardSection = document.getElementById('dashboardSection');
 
-        // Form Gönderildiğinde Çalışacak Fonksiyon
         loginForm.addEventListener('submit', function(e) {
-            e.preventDefault(); // Sayfa yenilenmesini durdur
+            e.preventDefault();
 
-            // Kullanıcı verilerini al
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
 
-            // Arayüzü "Yükleniyor" moduna al
-            loginBtn.disabled = true; 
+            loginBtn.disabled = true;
             spinner.style.display = 'block';
             errorMsg.classList.add('d-none');
             
-            // --- CORS ÇÖZÜMÜ: FORM VERİSİ ---
-            // JSON yerine URLSearchParams kullanıyoruz.
-            // Bu sayede tarayıcı Google'a "Ben sadece form gönderiyorum" der ve engellenmez.
-            const formData = new URLSearchParams();
-            formData.append("action", "login");
-            formData.append("username", username);
-            formData.append("password", password);
+            // Veri Paketi
+            const payload = {
+                action: "login",
+                username: username,
+                password: password
+            };
 
-            // FETCH İSTEĞİ
+            // CORS'u DELEN YÖNTEM: "text/plain"
+            // Header eklemiyoruz. Veriyi string olarak atıyoruz.
             fetch(API_URL, {
                 method: "POST",
-                body: formData 
-                // Header (Content-Type) eklemiyoruz, tarayıcı otomatik ayarlar.
+                body: JSON.stringify(payload)
             })
             .then(response => response.json())
             .then(data => {
-                // İşlem bitti
                 spinner.style.display = 'none';
                 loginBtn.disabled = false;
 
                 if (data.status === "success") {
-                    // --- GİRİŞ BAŞARILI ---
                     handleLoginSuccess(data);
+                } else if (data.status === "fatal_error") {
+                    showError("Sistem Hatası: " + data.message);
                 } else {
-                    // --- GİRİŞ HATALI ---
-                    showError(data.message || "Kullanıcı adı veya şifre yanlış.");
+                    showError(data.message || "Giriş yapılamadı.");
                 }
             })
             .catch(error => {
-                // --- BAĞLANTI HATASI ---
                 spinner.style.display = 'none';
                 loginBtn.disabled = false;
-                console.error("Hata Detayı:", error);
-                
-                showError("Sunucu hatası! Lütfen internet bağlantınızı kontrol edin.");
+                console.error("Hata:", error);
+                showError("Bağlantı Hatası: " + error.message);
             });
         });
 
-        // Başarılı Giriş Fonksiyonu
         function handleLoginSuccess(data) {
-            // Token'ı kaydet
             sessionStorage.setItem('crmToken', data.token);
             sessionStorage.setItem('crmUser', JSON.stringify(data.user));
-
-            // Ekran değiştir
-            loginSection.classList.add('d-none');
-            dashboardSection.classList.remove('d-none');
-            
-            // Kullanıcı adını yaz
+            document.getElementById('loginSection').classList.add('d-none');
+            document.getElementById('dashboardSection').classList.remove('d-none');
             document.getElementById('userDisplayName').innerText = data.user.name;
         }
 
-        // Hata Gösterme Fonksiyonu
         function showError(message) {
             errorMsg.innerText = message;
             errorMsg.classList.remove('d-none');
