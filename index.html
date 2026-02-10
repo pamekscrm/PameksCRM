@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tekstil CRM - Giriş</title>
+    <title>Tekstil CRM - Güvenli Giriş</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -69,7 +69,7 @@
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Yükleniyor...</span>
             </div>
-            <p class="small text-muted mt-2">Bilgiler doğrulanıyor...</p>
+            <p class="small text-muted mt-2">Sunucuya bağlanılıyor...</p>
         </div>
 
         <div id="errorMessage" class="alert alert-danger mt-3 d-none text-center" role="alert"></div>
@@ -90,7 +90,7 @@
     </div>
 
     <script>
-        // SENİN API LİNKİN (Doğrudan eklendi)
+        // SENİN API LİNKİN
         const API_URL = "https://script.google.com/macros/s/AKfycby6vg7szzK1m5UTCeLC2s8J82dSShpj5HiVmGDu40KKqxlmZShGAoRCoa9j5TbTJeV2Lw/exec";
 
         // HTML Elementlerini Seçelim
@@ -110,26 +110,27 @@
             const password = document.getElementById('password').value.trim();
 
             // Arayüzü "Yükleniyor" moduna al
-            loginBtn.disabled = true; // Çift tıklamayı önle
+            loginBtn.disabled = true; 
             spinner.style.display = 'block';
             errorMsg.classList.add('d-none');
             
-            // Gönderilecek Paket
-            const payload = {
-                action: "login",
-                username: username,
-                password: password
-            };
+            // --- CORS ÇÖZÜMÜ: FORM VERİSİ ---
+            // JSON yerine URLSearchParams kullanıyoruz.
+            // Bu sayede tarayıcı Google'a "Ben sadece form gönderiyorum" der ve engellenmez.
+            const formData = new URLSearchParams();
+            formData.append("action", "login");
+            formData.append("username", username);
+            formData.append("password", password);
 
-            // FETCH İSTEĞİ (CORS Hatasını Önleyen Yapı)
+            // FETCH İSTEĞİ
             fetch(API_URL, {
                 method: "POST",
-                body: JSON.stringify(payload)
-                // Header eklemiyoruz, Google bunu "text/plain" olarak algılar ve kabul eder.
+                body: formData 
+                // Header (Content-Type) eklemiyoruz, tarayıcı otomatik ayarlar.
             })
             .then(response => response.json())
             .then(data => {
-                // İşlem bitti, spinner'ı gizle
+                // İşlem bitti
                 spinner.style.display = 'none';
                 loginBtn.disabled = false;
 
@@ -147,30 +148,22 @@
                 loginBtn.disabled = false;
                 console.error("Hata Detayı:", error);
                 
-                // Kullanıcıya anlayacağı dilden hata mesajı
-                if(error.message === "Failed to fetch") {
-                    showError("Sunucuya ulaşılamadı. İnternet bağlantınızı kontrol edin.");
-                } else {
-                    showError("Bir hata oluştu: " + error.message);
-                }
+                showError("Sunucu hatası! Lütfen internet bağlantınızı kontrol edin.");
             });
         });
 
         // Başarılı Giriş Fonksiyonu
         function handleLoginSuccess(data) {
-            // Token'ı ve kullanıcıyı tarayıcı hafızasına kaydet
+            // Token'ı kaydet
             sessionStorage.setItem('crmToken', data.token);
             sessionStorage.setItem('crmUser', JSON.stringify(data.user));
 
-            // Ekranlar Arası Geçiş Yap
-            loginSection.classList.add('d-none'); // Giriş ekranını gizle
-            dashboardSection.classList.remove('d-none'); // Ana paneli göster
+            // Ekran değiştir
+            loginSection.classList.add('d-none');
+            dashboardSection.classList.remove('d-none');
             
-            // Kullanıcının Adını Ekrana Yaz
+            // Kullanıcı adını yaz
             document.getElementById('userDisplayName').innerText = data.user.name;
-
-            // Log kaydı (Konsoldan takip için)
-            console.log("Giriş Yapan:", data.user);
         }
 
         // Hata Gösterme Fonksiyonu
