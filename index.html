@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tekstil CRM - Giriş</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: white;
+        }
+        .crm-logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0d6efd;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #loadingSpinner {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card" id="loginSection">
+        <div class="crm-logo">👔 Tekstil CRM</div>
+        
+        <form id="loginForm">
+            <div class="mb-3">
+                <label for="username" class="form-label">Kullanıcı Adı</label>
+                <input type="text" class="form-control" id="username" placeholder="Örn: admin" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Şifre</label>
+                <input type="password" class="form-control" id="password" placeholder="******" required>
+            </div>
+            
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Giriş Yap</button>
+            </div>
+        </form>
+
+        <div id="loadingSpinner" class="text-center mt-3">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+            <p class="small text-muted">Sunucuya bağlanılıyor...</p>
+        </div>
+
+        <div id="errorMessage" class="alert alert-danger mt-3 d-none" role="alert"></div>
+    </div>
+
+    <div id="dashboardSection" class="container d-none">
+        <div class="alert alert-success mt-5 text-center">
+            <h3>🎉 Giriş Başarılı!</h3>
+            <p>Hoşgeldin, <span id="userDisplayName" class="fw-bold"></span></p>
+            <p>Sisteme yönlendiriliyorsunuz...</p>
+        </div>
+    </div>
+
+    <script>
+        // SENİN API LİNKİN
+        const API_URL = "https://script.google.com/macros/s/AKfycby6vg7szzK1m5UTCeLC2s8J82dSShpj5HiVmGDu40KKqxlmZShGAoRCoa9j5TbTJeV2Lw/exec";
+
+        const loginForm = document.getElementById('loginForm');
+        const spinner = document.getElementById('loadingSpinner');
+        const errorMsg = document.getElementById('errorMessage');
+        const loginSection = document.getElementById('loginSection');
+        const dashboardSection = document.getElementById('dashboardSection');
+
+        // Form Gönderildiğinde Çalışacak Kod
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Sayfanın yenilenmesini engelle
+
+            // 1. Verileri Al
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // 2. Arayüzü Güncelle (Yükleniyor...)
+            spinner.style.display = 'block';
+            errorMsg.classList.add('d-none');
+            
+            // 3. API'ye İstek Gönder (POST)
+            const payload = {
+                action: "login",
+                username: username,
+                password: password
+            };
+
+            fetch(API_URL, {
+                method: "POST",
+                mode: "cors", // Farklı domain olduğu için gerekli
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                spinner.style.display = 'none';
+
+                if (data.status === "success") {
+                    // BAŞARILI GİRİŞ
+                    handleLoginSuccess(data);
+                } else {
+                    // HATALI GİRİŞ
+                    showError(data.message || "Bilinmeyen bir hata oluştu.");
+                }
+            })
+            .catch(error => {
+                spinner.style.display = 'none';
+                showError("Sunucu hatası: " + error.message);
+                console.error("Hata:", error);
+            });
+        });
+
+        function handleLoginSuccess(data) {
+            // Token'ı tarayıcı hafızasına kaydet (SessionStorage)
+            sessionStorage.setItem('crmToken', data.token);
+            sessionStorage.setItem('crmUser', JSON.stringify(data.user));
+
+            // Ekranı Değiştir
+            loginSection.classList.add('d-none');
+            dashboardSection.classList.remove('d-none');
+            
+            // Kullanıcı Adını Göster
+            document.getElementById('userDisplayName').innerText = data.user.name;
+
+            // İleride buraya ana sayfayı yükleyen kod gelecek
+            console.log("Kullanıcı Rolü:", data.user.role);
+        }
+
+        function showError(message) {
+            errorMsg.innerText = message;
+            errorMsg.classList.remove('d-none');
+        }
+    </script>
+</body>
+</html>
