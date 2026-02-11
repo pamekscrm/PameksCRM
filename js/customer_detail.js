@@ -1,5 +1,5 @@
 /**
- * js/customer_detail.js - TÜM SEKMELER VE PAZARLIK SİSTEMİ DAHİL TAM SÜRÜM
+ * js/customer_detail.js - TÜM SEKMELER, TÜM AKSIYONLAR VE ÜÇLÜ FİYAT DAHİL TAM SÜRÜM
  */
 
 async function showCustomerDashboard(id) {
@@ -67,7 +67,7 @@ async function showCustomerDashboard(id) {
                                     <button class="nav-link py-3 px-4 fw-bold" id="notes-tab-btn" data-bs-toggle="tab" data-bs-target="#tab-notes" onclick="fetchDetailNotes('${d.id}')">Notlar</button>
                                 </li>
                                 <li class="nav-item">
-                                    <button class="nav-link py-3 px-4 fw-bold" id="quotations-tab-btn" data-bs-toggle="tab" data-bs-target="#tab-quotations" onclick="fetchDetailQuotations('${d.id}')">Teklifler</button>
+                                    <button class="nav-link py-3 px-4 fw-bold" id="quotations-tab-btn" data-bs-toggle="tab" data-bs-target="#tab-quotations" onclick="fetchDetailQuotations('${d.id}')">Model Teklifleri</button>
                                 </li>
                                 <li class="nav-item">
                                     <button class="nav-link py-3 px-4 fw-bold" id="attachments-tab-btn" data-bs-toggle="tab" data-bs-target="#tab-attachments" onclick="fetchDetailAttachments('${d.id}')">Ekler</button>
@@ -77,19 +77,13 @@ async function showCustomerDashboard(id) {
                         <div class="card-body p-4 tab-content">
                             <div class="tab-pane fade show active" id="tab-contacts">
                                 <div class="d-flex justify-content-between mb-3 align-items-center">
-                                    <h6 class="m-0 fw-bold text-dark">İletişim Kişileri</h6>
+                                    <h6 class="m-0 fw-bold text-dark">İlgili Kişiler</h6>
                                     <button class="btn btn-sm btn-primary" onclick="openContactModal('new')"><i class="fas fa-user-plus me-1"></i> Yeni Kişi</button>
                                 </div>
                                 <div class="table-responsive">
                                     <table class="table table-sm table-hover align-middle">
                                         <thead class="table-light small text-uppercase fw-bold">
-                                            <tr>
-                                                <th>Ad Soyad / Ünvan</th>
-                                                <th>Departman</th>
-                                                <th>İletişim</th>
-                                                <th class="text-center">Birincil</th>
-                                                <th class="text-end">İşlem</th>
-                                            </tr>
+                                            <tr><th>Ad Soyad / Ünvan</th><th>Departman</th><th>İletişim</th><th class="text-center">Birincil</th><th class="text-end">İşlem</th></tr>
                                         </thead>
                                         <tbody id="detailContactBody"></tbody>
                                     </table>
@@ -98,7 +92,7 @@ async function showCustomerDashboard(id) {
 
                             <div class="tab-pane fade" id="tab-tasks">
                                 <div class="d-flex justify-content-between mb-3 align-items-center">
-                                    <h6 class="m-0 fw-bold text-dark">Görevler ve Hatırlatıcılar</h6>
+                                    <h6 class="m-0 fw-bold text-dark">Görev Takibi</h6>
                                     <button class="btn btn-sm btn-primary" onclick="openTaskModal('new')"><i class="fas fa-plus me-1"></i> Yeni Görev</button>
                                 </div>
                                 <div id="detailTaskContainer" class="row g-3"></div>
@@ -106,7 +100,7 @@ async function showCustomerDashboard(id) {
 
                             <div class="tab-pane fade" id="tab-notes">
                                 <div class="d-flex justify-content-between mb-3 align-items-center">
-                                    <h6 class="m-0 fw-bold text-dark">Özel Notlar</h6>
+                                    <h6 class="m-0 fw-bold text-dark">Notlar</h6>
                                     <button class="btn btn-sm btn-primary" onclick="openNoteModal('new')"><i class="fas fa-sticky-note me-1"></i> Not Ekle</button>
                                 </div>
                                 <div id="detailNoteContainer" class="row g-3"></div>
@@ -114,21 +108,13 @@ async function showCustomerDashboard(id) {
 
                             <div class="tab-pane fade" id="tab-quotations">
                                 <div class="d-flex justify-content-between mb-3 align-items-center">
-                                    <h6 class="m-0 fw-bold text-dark">Model Teklifleri & Pazarlık Masası</h6>
+                                    <h6 class="m-0 fw-bold text-dark">Model Teklifleri</h6>
                                     <button class="btn btn-sm btn-primary" onclick="openQuotationModal('new')"><i class="fas fa-plus me-1"></i> Yeni Teklif</button>
                                 </div>
                                 <div class="table-responsive">
                                     <table class="table table-sm table-hover align-middle text-nowrap">
                                         <thead class="table-light small text-uppercase fw-bold">
-                                            <tr>
-                                                <th>No / Model</th>
-                                                <th>Kumaş</th>
-                                                <th class="text-primary">Talep (Target)</th>
-                                                <th class="text-danger">Teklif (Offered)</th>
-                                                <th class="text-success">Onay (Agreed)</th>
-                                                <th>Sonuç</th>
-                                                <th class="text-end">İşlem</th>
-                                            </tr>
+                                            <tr><th>No / Model</th><th>Kumaş</th><th class="text-primary">Talep</th><th class="text-danger">Teklif</th><th class="text-success">Onay</th><th>Sonuç</th><th class="text-end">İşlem</th></tr>
                                         </thead>
                                         <tbody id="detailQuotationBody"></tbody>
                                     </table>
@@ -137,7 +123,7 @@ async function showCustomerDashboard(id) {
 
                             <div class="tab-pane fade" id="tab-attachments">
                                 <div class="d-flex justify-content-between mb-3 align-items-center">
-                                    <h6 class="m-0 fw-bold text-dark">Dosyalar ve Dokümanlar</h6>
+                                    <h6 class="m-0 fw-bold text-dark">Ekli Dosyalar</h6>
                                     <button class="btn btn-sm btn-primary" onclick="openAttachmentModal()"><i class="fas fa-upload me-1"></i> Dosya Yükle</button>
                                 </div>
                                 <div id="detailAttachmentContainer" class="row g-3"></div>
@@ -152,72 +138,97 @@ async function showCustomerDashboard(id) {
     } catch (e) { console.error(e); } finally { hideLoading(); }
 }
 
-/**
- * 1. İLETİŞİM KİŞİLERİ (TAM SAHA)
- */
+/** 1. İLGİLİ KİŞİLER MODÜLÜ */
 async function fetchDetailContacts(customerId) {
     const b = document.getElementById('detailContactBody');
     if(!b) return;
     b.innerHTML = '<tr><td colspan="5" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>';
-    
     try {
-        const res = await fetch(API_URL, { 
-            method: "POST", 
-            body: JSON.stringify({ action: "getContacts", customerId: customerId }) 
-        }).then(r => r.json());
-
+        const res = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "getContacts", customerId: customerId }) }).then(r => r.json());
         b.innerHTML = "";
         if(res.status === "success" && res.data.length > 0) {
             res.data.forEach(c => {
                 const isPrimary = String(c.isPrimary).trim() === "Evet";
-                const primaryTag = isPrimary 
-                    ? '<span class="badge bg-warning text-dark"><i class="fas fa-star"></i></span>' 
-                    : '<span class="text-muted small">Hayır</span>';
-                
+                const primaryTag = isPrimary ? '<span class="badge bg-warning text-dark"><i class="fas fa-star"></i></span>' : '<span class="text-muted small">Hayır</span>';
                 b.innerHTML += `<tr>
                     <td><strong>${c.name}</strong><br><small class="text-muted">${c.title || '-'}</small></td>
                     <td>${c.department || '-'}</td>
-                    <td><small><i class="fas fa-phone me-1 text-muted"></i>${c.phone || ''}<br><i class="fas fa-envelope me-1 text-muted"></i>${c.email || ''}</small></td>
+                    <td><small>${c.phone || ''}<br>${c.email || ''}</small></td>
                     <td class="text-center">${primaryTag}</td>
                     <td class="text-end">
-                        <button class="btn btn-sm btn-link text-primary me-2 p-0" title="Düzenle" onclick='editContact(${JSON.stringify(c)})'><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-sm btn-link text-danger p-0" title="Sil" onclick="deleteContactFunc('${c.id}', '${c.customerId}')"><i class="fas fa-trash"></i></button>
+                        <button class="btn btn-sm btn-link text-primary me-2 p-0" onclick='editContact(${JSON.stringify(c)})'><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-link text-danger p-0" onclick="deleteContactFunc('${c.id}', '${customerId}')"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>`;
             });
-        } else { 
-            b.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Kayıtlı kişi bulunamadı.</td></tr>'; 
-        }
-    } catch (err) { b.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Veri yükleme hatası.</td></tr>'; }
+        } else { b.innerHTML = '<tr><td colspan="5" class="text-center py-4">Kayıt bulunamadı.</td></tr>'; }
+    } catch (err) { b.innerHTML = '<tr><td colspan="5" class="text-danger text-center">Veri çekilemedi.</td></tr>'; }
 }
 
-/**
- * 2. GÖREVLER (TAM SAHA)
- */
+function openContactModal(mode) { document.getElementById('contactForm').reset(); document.getElementById('contId').value = ""; new bootstrap.Modal(document.getElementById('contactModal')).show(); }
+
+function editContact(c) {
+    document.getElementById('contId').value = c.id;
+    document.getElementById('contName').value = c.name;
+    document.getElementById('contDept').value = c.department || "";
+    document.getElementById('contTitle').value = c.title || "";
+    document.getElementById('contPhone').value = c.phone || "";
+    document.getElementById('contEmail').value = c.email || "";
+    document.getElementById('contPrimary').value = c.isPrimary || "Hayır";
+    document.getElementById('contStatus').value = c.status || "Aktif";
+    new bootstrap.Modal(document.getElementById('contactModal')).show();
+}
+
+async function saveContactData() {
+    const custId = document.getElementById('dashboardCustId').value;
+    const obj = { id: document.getElementById('contId').value, customerId: custId, name: document.getElementById('contName').value.trim(), department: document.getElementById('contDept').value.trim(), title: document.getElementById('contTitle').value.trim(), phone: document.getElementById('contPhone').value.trim(), email: document.getElementById('contEmail').value.trim(), isPrimary: document.getElementById('contPrimary').value, status: document.getElementById('contStatus').value };
+    if(!obj.name) return Swal.fire("Uyarı", "Ad Soyad alanı zorunludur.", "warning");
+    showLoading();
+    try {
+        const res = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveContact", contactData: obj, currentUser: currentUser.name }) }).then(r => r.json());
+        hideLoading();
+        if(res.status === 'success') {
+            bootstrap.Modal.getInstance(document.getElementById('contactModal')).hide();
+            fetchDetailContacts(custId);
+            Swal.fire({ icon: 'success', title: 'Başarılı', text: res.message, timer: 1500, showConfirmButton: false });
+        }
+    } catch (e) { hideLoading(); Swal.fire("Hata", "Bağlantı sorunu.", "error"); }
+}
+
+async function deleteContactFunc(id, customerId) {
+    const r = await Swal.fire({ title: 'Kişiyi Sil?', text: "Bu kaydı kalıcı olarak silmek istediğinize emin misiniz?", icon: 'warning', showCancelButton: true, confirmButtonText: 'Evet, Sil', cancelButtonText: 'Vazgeç' });
+    if (r.isConfirmed) {
+        showLoading();
+        try {
+            await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "deleteContact", contactId: id }) });
+            hideLoading();
+            fetchDetailContacts(customerId);
+        } catch (e) { hideLoading(); Swal.fire('Hata!', 'İşlem başarısız.', 'error'); }
+    }
+}
+
+/** 2. GÖREV MODÜLÜ */
 async function fetchDetailTasks(customerId) {
     const container = document.getElementById('detailTaskContainer');
+    if(!container) return;
     container.innerHTML = '<div class="col-12 text-center py-4"><div class="spinner-border text-primary"></div></div>';
-    
     try {
         const res = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "getTasks", customerId: customerId }) }).then(r => r.json());
         container.innerHTML = "";
         if(res.status === "success" && res.data.length > 0) {
             res.data.forEach(t => {
-                const priorityClass = t.priority === "Yüksek" ? "danger" : (t.priority === "Orta" ? "warning" : "info");
+                const pClass = t.priority === "Yüksek" ? "danger" : (t.priority === "Orta" ? "warning" : "info");
                 container.innerHTML += `
                     <div class="col-md-6 col-lg-4">
-                        <div class="card h-100 border-start border-4 border-${priorityClass} shadow-sm">
+                        <div class="card h-100 border-start border-4 border-${pClass} shadow-sm">
                             <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <h6 class="fw-bold text-dark">${t.type}</h6>
-                                    <span class="badge bg-${priorityClass}">${t.priority}</span>
-                                </div>
-                                <p class="small text-muted mb-2">${t.description || 'Açıklama yok'}</p>
-                                <div class="small"><i class="fas fa-user me-1"></i> ${t.assignedUser || '-'}</div>
-                                <div class="small"><i class="fas fa-calendar-alt me-1"></i> Bitiş: ${t.endDate || '-'}</div>
+                                <div class="d-flex justify-content-between mb-2"><h6 class="fw-bold text-dark">${t.type}</h6><span class="badge bg-${pClass}">${t.priority}</span></div>
+                                <p class="small text-muted mb-2">${t.description || ''}</p>
+                                <div class="small"><strong>Sorumlu:</strong> ${t.assignedUser || '-'}</div>
+                                <div class="small"><strong>Bitiş:</strong> ${t.endDate || '-'}</div>
                             </div>
                             <div class="card-footer bg-transparent border-0 d-flex justify-content-between align-items-center">
-                                <span class="badge bg-light text-dark border">${t.status}</span>
+                                <span class="badge bg-light text-dark border small">${t.status}</span>
                                 <div>
                                     <button class="btn btn-sm btn-link text-primary p-0 me-2" onclick='editTask(${JSON.stringify(t)})'><i class="fas fa-edit"></i></button>
                                     <button class="btn btn-sm btn-link text-danger p-0" onclick="deleteTaskFunc('${t.id}', '${customerId}')"><i class="fas fa-trash"></i></button>
@@ -226,51 +237,64 @@ async function fetchDetailTasks(customerId) {
                         </div>
                     </div>`;
             });
-        } else { container.innerHTML = '<div class="col-12 text-center text-muted">Bekleyen görev bulunmuyor.</div>'; }
-    } catch (e) { container.innerHTML = '<div class="col-12 text-danger">Hata oluştu.</div>'; }
+        } else { container.innerHTML = '<div class="col-12 text-center text-muted py-4">Bekleyen görev bulunamadı.</div>'; }
+    } catch (e) { container.innerHTML = '<div class="col-12 text-danger text-center">Yükleme sırasında hata oluştu.</div>'; }
 }
 
-/**
- * 3. TEKLİFLER (PAZARLIK MASASI)
- */
-async function fetchDetailQuotations(customerId) {
-    const tbody = document.getElementById('detailQuotationBody');
-    if(!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>';
-    
+function openTaskModal(mode) { document.getElementById('taskForm').reset(); document.getElementById('taskId').value = ""; new bootstrap.Modal(document.getElementById('taskModal')).show(); }
+
+function editTask(t) {
+    document.getElementById('taskId').value = t.id;
+    document.getElementById('taskType').value = t.type;
+    document.getElementById('taskAssigned').value = t.assignedUser || "";
+    document.getElementById('taskStart').value = t.startDate || "";
+    document.getElementById('taskEnd').value = t.endDate || "";
+    document.getElementById('taskPriority').value = t.priority || "Orta";
+    document.getElementById('taskStatus').value = t.status || "Açık";
+    document.getElementById('taskDesc').value = t.description || "";
+    new bootstrap.Modal(document.getElementById('taskModal')).show();
+}
+
+async function saveTaskData() {
+    const custId = document.getElementById('dashboardCustId').value;
+    const obj = {
+        id: document.getElementById('taskId').value,
+        customerId: custId,
+        type: document.getElementById('taskType').value.trim(),
+        assignedUser: document.getElementById('taskAssigned').value.trim(),
+        startDate: document.getElementById('taskStart').value,
+        endDate: document.getElementById('taskEnd').value,
+        priority: document.getElementById('taskPriority').value,
+        status: document.getElementById('taskStatus').value,
+        description: document.getElementById('taskDesc').value.trim()
+    };
+    if(!obj.type) return Swal.fire("Uyarı", "Görev konusu boş bırakılamaz.", "warning");
+    showLoading();
     try {
-        const res = await fetch(API_URL, { 
-            method: "POST", 
-            body: JSON.stringify({ action: "getQuotations", customerId: customerId }) 
-        }).then(r => r.json());
-
-        tbody.innerHTML = "";
-        if(res.status === "success" && res.data.length > 0) {
-            res.data.forEach(q => {
-                const statusBadge = getQuotationStatusBadge(q.result);
-                tbody.innerHTML += `
-                    <tr>
-                        <td><span class="fw-bold text-primary">${q.quoteNo}</span><br><small>${q.modelCode || '-'}</small></td>
-                        <td><small>${q.fabric || '-'}</small></td>
-                        <td class="fw-bold text-primary">${q.targetPrice || '0'} ${q.currency}</td>
-                        <td class="fw-bold text-danger">${q.offeredPrice || '0'} ${q.currency}</td>
-                        <td class="fw-bold text-success">${q.agreedPrice || '0'} ${q.currency}</td>
-                        <td>${statusBadge}</td>
-                        <td class="text-end">
-                            <button class="btn btn-sm btn-link text-primary me-2 p-0" title="Pazarlık / Revize" onclick='editQuotation(${JSON.stringify(q)})'><i class="fas fa-handshake fa-lg"></i></button>
-                            <button class="btn btn-sm btn-link text-danger p-0" title="Sil" onclick="deleteQuotationFunc('${q.id}', '${customerId}')"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>`;
-            });
-        } else { tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">Teklif kaydı bulunamadı.</td></tr>'; }
-    } catch (err) { tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger py-4">Yükleme hatası.</td></tr>'; }
+        await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveTask", taskData: obj, currentUser: currentUser.name }) });
+        hideLoading();
+        bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
+        fetchDetailTasks(custId);
+        Swal.fire({ icon: 'success', title: 'Kaydedildi', timer: 1000, showConfirmButton: false });
+    } catch (e) { hideLoading(); Swal.fire("Hata", "Kaydetme başarısız.", "error"); }
 }
 
-/**
- * 4. NOTLAR VE EKLER
- */
+async function deleteTaskFunc(id, customerId) {
+    const r = await Swal.fire({ title: 'Görevi Sil?', icon: 'warning', showCancelButton: true });
+    if (r.isConfirmed) {
+        showLoading();
+        try {
+            await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "deleteTask", taskId: id }) });
+            hideLoading();
+            fetchDetailTasks(customerId);
+        } catch (e) { hideLoading(); Swal.fire('Hata!', 'Silinemedi.', 'error'); }
+    }
+}
+
+/** 3. NOTLAR MODÜLÜ */
 async function fetchDetailNotes(customerId) {
     const container = document.getElementById('detailNoteContainer');
+    if(!container) return;
     container.innerHTML = '<div class="col-12 text-center py-4"><div class="spinner-border text-primary"></div></div>';
     try {
         const res = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "getNotes", customerId: customerId }) }).then(r => r.json());
@@ -282,7 +306,7 @@ async function fetchDetailNotes(customerId) {
                         <div class="card h-100 shadow-sm border-0 bg-light">
                             <div class="card-body">
                                 <h6 class="fw-bold text-primary">${n.title}</h6>
-                                <p class="small text-dark mb-2" style="white-space: pre-wrap;">${n.content || ''}</p>
+                                <p class="small mb-2" style="white-space: pre-wrap;">${n.content || ''}</p>
                                 <div class="text-end small text-muted border-top pt-2">${n.date || ''}</div>
                             </div>
                             <div class="card-footer bg-transparent border-0 text-end">
@@ -292,12 +316,78 @@ async function fetchDetailNotes(customerId) {
                         </div>
                     </div>`;
             });
-        } else { container.innerHTML = '<div class="col-12 text-center text-muted">Henüz not eklenmemiş.</div>'; }
-    } catch (e) { container.innerHTML = '<div class="col-12 text-danger text-center">Notlar alınamadı.</div>'; }
+        } else { container.innerHTML = '<div class="col-12 text-center text-muted py-4">Henüz not eklenmemiş.</div>'; }
+    } catch (e) { container.innerHTML = '<div class="col-12 text-danger text-center">Hata.</div>'; }
 }
 
+function openNoteModal(mode) { document.getElementById('noteForm').reset(); document.getElementById('noteId').value = ""; new bootstrap.Modal(document.getElementById('noteModal')).show(); }
+
+function editNote(n) {
+    document.getElementById('noteId').value = n.id;
+    document.getElementById('noteTitle').value = n.title;
+    document.getElementById('noteContent').value = n.content || "";
+    document.getElementById('noteDate').value = n.date || "";
+    new bootstrap.Modal(document.getElementById('noteModal')).show();
+}
+
+async function saveNoteData() {
+    const custId = document.getElementById('dashboardCustId').value;
+    const obj = { id: document.getElementById('noteId').value, customerId: custId, title: document.getElementById('noteTitle').value.trim(), content: document.getElementById('noteContent').value.trim(), date: document.getElementById('noteDate').value };
+    if(!obj.title) return Swal.fire("Uyarı", "Başlık zorunludur.", "warning");
+    showLoading();
+    try {
+        await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveNote", noteData: obj, currentUser: currentUser.name }) });
+        hideLoading();
+        bootstrap.Modal.getInstance(document.getElementById('noteModal')).hide();
+        fetchDetailNotes(custId);
+    } catch (e) { hideLoading(); Swal.fire("Hata", "Kaydetme başarısız.", "error"); }
+}
+
+async function deleteNoteFunc(id, customerId) {
+    const r = await Swal.fire({ title: 'Notu Sil?', icon: 'warning', showCancelButton: true });
+    if (r.isConfirmed) {
+        showLoading();
+        try {
+            await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "deleteNote", noteId: id }) });
+            hideLoading();
+            fetchDetailNotes(customerId);
+        } catch (e) { hideLoading(); Swal.fire('Hata!', 'İşlem başarısız.', 'error'); }
+    }
+}
+
+/** 4. MODEL TEKLİFLERİ (ÜÇLÜ FİYAT - GÜNCEL) */
+async function fetchDetailQuotations(customerId) {
+    const tbody = document.getElementById('detailQuotationBody');
+    if(!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>';
+    try {
+        const res = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "getQuotations", customerId: customerId }) }).then(r => r.json());
+        tbody.innerHTML = "";
+        if(res.status === "success" && res.data && res.data.length > 0) {
+            res.data.forEach(q => {
+                const statusBadge = getQuotationStatusBadge(q.result);
+                tbody.innerHTML += `
+                    <tr>
+                        <td><span class="fw-bold text-primary">${q.quoteNo}</span><br><small>${q.modelCode || '-'}</small></td>
+                        <td><small>${q.fabric || '-'}</small></td>
+                        <td class="fw-bold text-primary">${q.targetPrice || '0'} ${q.currency}</td>
+                        <td class="fw-bold text-danger">${q.offeredPrice || '0'} ${q.currency}</td>
+                        <td class="fw-bold text-success">${q.agreedPrice || '0'} ${q.currency}</td>
+                        <td>${statusBadge}</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-link text-primary me-2 p-0" title="Pazarlık" onclick='editQuotation(${JSON.stringify(q)})'><i class="fas fa-handshake fa-lg"></i></button>
+                            <button class="btn btn-sm btn-link text-danger p-0" title="Sil" onclick="deleteQuotationFunc('${q.id}', '${customerId}')"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+            });
+        } else { tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Teklif bulunmuyor.</td></tr>'; }
+    } catch (err) { tbody.innerHTML = '<tr><td colspan="7" class="text-danger text-center">Yükleme hatası.</td></tr>'; }
+}
+
+/** 5. EKLER MODÜLÜ */
 async function fetchDetailAttachments(customerId) {
     const container = document.getElementById('detailAttachmentContainer');
+    if(!container) return;
     container.innerHTML = '<div class="col-12 text-center py-4"><div class="spinner-border text-primary"></div></div>';
     try {
         const res = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "getAttachments", customerId: customerId }) }).then(r => r.json());
@@ -309,7 +399,7 @@ async function fetchDetailAttachments(customerId) {
                         <div class="card h-100 shadow-sm border-0">
                             <div class="card-body text-center">
                                 <i class="fas fa-file-pdf fa-3x text-danger mb-3"></i>
-                                <h6 class="fw-bold mb-1">${a.tag || 'Dosya'}</h6>
+                                <h6 class="fw-bold mb-1 small">${a.tag || 'Dosya'}</h6>
                                 <p class="small text-muted mb-3">${a.description || ''}</p>
                                 <a href="${a.fileUrl}" target="_blank" class="btn btn-sm btn-outline-primary w-100 fw-bold"><i class="fas fa-download me-1"></i> Görüntüle</a>
                             </div>
@@ -319,72 +409,30 @@ async function fetchDetailAttachments(customerId) {
                         </div>
                     </div>`;
             });
-        } else { container.innerHTML = '<div class="col-12 text-center text-muted">Yüklü dosya bulunmuyor.</div>'; }
-    } catch (e) { container.innerHTML = '<div class="col-12 text-danger text-center">Ekler alınamadı.</div>'; }
+        } else { container.innerHTML = '<div class="col-12 text-center py-4 text-muted">Dosya yok.</div>'; }
+    } catch (e) { container.innerHTML = '<div class="col-12 text-danger">Hata oluştu.</div>'; }
 }
 
-/**
- * MODAL VE YARDIMCI FONKSİYONLAR (HATA GİDERİLMİŞ)
- */
-function openContactModal(mode) { 
-    document.getElementById('contactForm').reset(); 
-    document.getElementById('contId').value = ""; 
-    const modal = new bootstrap.Modal(document.getElementById('contactModal'));
-    modal.show(); 
-}
+function openAttachmentModal() { document.getElementById('attachmentForm').reset(); new bootstrap.Modal(document.getElementById('attachmentModal')).show(); }
 
-function editContact(c) {
-    document.getElementById('contId').value = c.id;
-    document.getElementById('contName').value = c.name;
-    document.getElementById('contDept').value = c.department || "";
-    document.getElementById('contTitle').value = c.title || "";
-    document.getElementById('contPhone').value = c.phone || "";
-    document.getElementById('contEmail').value = c.email || "";
-    document.getElementById('contPrimary').value = c.isPrimary || "Hayır";
-    document.getElementById('contStatus').value = c.status || "Aktif";
-    const modal = new bootstrap.Modal(document.getElementById('contactModal'));
-    modal.show();
-}
-
-async function saveContactData() {
-    const custId = document.getElementById('dashboardCustId').value;
-    const contactObj = {
-        id: document.getElementById('contId').value,
-        customerId: custId,
-        name: document.getElementById('contName').value.trim(),
-        department: document.getElementById('contDept').value.trim(),
-        title: document.getElementById('contTitle').value.trim(),
-        phone: document.getElementById('contPhone').value.trim(),
-        email: document.getElementById('contEmail').value.trim(),
-        isPrimary: document.getElementById('contPrimary').value,
-        status: document.getElementById('contStatus').value
-    };
-    if(!contactObj.name) return Swal.fire("Uyarı", "Ad Soyad alanı boş bırakılamaz.", "warning");
-    showLoading();
-    try {
-        const res = await fetch(API_URL, { 
-            method: "POST", 
-            body: JSON.stringify({ action: "saveContact", contactData: contactObj, currentUser: currentUser.name }) 
-        }).then(r => r.json());
-        hideLoading();
-        if(res.status === 'success') {
-            bootstrap.Modal.getInstance(document.getElementById('contactModal')).hide();
-            fetchDetailContacts(custId);
-            Swal.fire({ icon: 'success', title: 'Başarılı', text: res.message, timer: 1500, showConfirmButton: false });
-        }
-    } catch (e) { hideLoading(); Swal.fire("Hata", "Bağlantı sorunu.", "error"); }
-}
-
-async function deleteContactFunc(id, customerId) {
-    const r = await Swal.fire({ title: 'Emin misiniz?', text: "Kişi kaydı silinecektir!", icon: 'warning', showCancelButton: true, confirmButtonText: 'Evet, Sil', cancelButtonText: 'Vazgeç' });
+async function deleteAttachmentFunc(id, customerId) {
+    const r = await Swal.fire({ title: 'Dosyayı Sil?', text: "Bu işlem geri alınamaz!", icon: 'warning', showCancelButton: true });
     if (r.isConfirmed) {
         showLoading();
         try {
-            await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "deleteContact", contactId: id }) });
+            await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "deleteAttachment", attachmentId: id }) });
             hideLoading();
-            fetchDetailContacts(customerId);
-        } catch (e) { hideLoading(); Swal.fire('Hata!', 'İşlem başarısız.', 'error'); }
+            fetchDetailAttachments(customerId);
+        } catch (e) { hideLoading(); Swal.fire('Hata!', 'Silme başarısız.', 'error'); }
     }
 }
 
-// Diğer modül silme ve düzenleme fonksiyonları (editTask, editNote vb.) Quotations.js'dekine benzer şekilde çalışır.
+/** YARDIMCI ARAÇLAR */
+function getQuotationStatusBadge(status) {
+    let cls = "bg-secondary";
+    if(status === "Onaylandı") cls = "bg-success";
+    if(status === "Reddedildi" || status === "İptal") cls = "bg-danger";
+    if(status === "Açık") cls = "bg-primary";
+    if(status === "Revize Edildi") cls = "bg-warning text-dark";
+    return `<span class="badge ${cls} small">${status}</span>`;
+}
