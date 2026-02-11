@@ -1,5 +1,5 @@
 /**
- * js/customer_detail.js - MODERN DASHBOARD & BİRİNCİL SÜTUNU DÜZELTİLMİŞ SÜRÜM
+ * js/customer_detail.js - BİRİNCİL SÜTUNU VE KULLANICI ADI DÜZELTİLMİŞ TAM SÜRÜM
  */
 
 async function showCustomerDashboard(id) {
@@ -64,7 +64,7 @@ async function showCustomerDashboard(id) {
                         <div class="card-body p-4 tab-content">
                             <div class="tab-pane fade show active" id="tab-contacts">
                                 <div class="d-flex justify-content-between mb-3 align-items-center">
-                                    <h6 class="m-0 fw-bold text-dark">Kayıtlı İnsanlar</h6>
+                                    <h6 class="m-0 fw-bold text-dark">Kayıtlı Kişiler</h6>
                                     <button class="btn btn-sm btn-primary" onclick="openContactModal('new')"><i class="fas fa-user-plus me-1"></i> Yeni Kişi</button>
                                 </div>
                                 <div class="table-responsive">
@@ -99,39 +99,45 @@ async function fetchDetailContacts(customerId) {
     if(!b) return;
     b.innerHTML = '<tr><td colspan="6" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>';
     
-    const res = await fetch(API_URL, { 
-        method: "POST", 
-        body: JSON.stringify({ action: "getContacts", customerId: customerId }) 
-    }).then(r => r.json());
+    try {
+        const res = await fetch(API_URL, { 
+            method: "POST", 
+            body: JSON.stringify({ action: "getContacts", customerId: customerId }) 
+        }).then(r => r.json());
 
-    b.innerHTML = "";
-    if(res.status === "success" && res.data.length > 0) {
-        res.data.forEach(c => {
-            // Birincil sütunu görsel belirteç: Evet ise yıldız, Hayır ise tire
-            let primaryTag = c.isPrimary === 'Evet' ? '<span class="badge bg-warning text-dark"><i class="fas fa-star me-1"></i>Birincil</span>' : '<span class="text-muted">-</span>';
-            
-            b.innerHTML += `<tr>
-                <td><strong>${c.name}</strong></td>
-                <td>${c.department || '-'}</td>
-                <td>${c.title || '-'}</td>
-                <td><small><i class="fas fa-phone me-1 text-muted"></i>${c.phone || ''}<br><i class="fas fa-envelope me-1 text-muted"></i>${c.email || ''}</small></td>
-                <td class="text-center">${primaryTag}</td>
-                <td class="text-end">
-                    <button class="btn btn-sm btn-link text-primary me-2 p-0" title="Düzenle" onclick='editContact(${JSON.stringify(c)})'><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-link text-danger p-0" title="Sil" onclick="deleteContactFunc('${c.id}', '${c.customerId}')"><i class="fas fa-trash"></i></button>
-                </td>
-            </tr>`;
-        });
-    } else { 
-        b.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Kayıtlı ilgili kişi bulunamadı.</td></tr>'; 
+        b.innerHTML = "";
+        if(res.status === "success" && res.data.length > 0) {
+            res.data.forEach(c => {
+                // EŞLEŞME KONTROLÜ: Sayfadaki değeri 'Evet' ise yıldız koyuyoruz
+                const isPrimary = String(c.isPrimary).trim() === "Evet";
+                const primaryTag = isPrimary 
+                    ? '<span class="badge bg-warning text-dark"><i class="fas fa-star me-1"></i>Evet</span>' 
+                    : '<span class="text-muted">Hayır</span>';
+                
+                b.innerHTML += `<tr>
+                    <td><strong>${c.name}</strong></td>
+                    <td>${c.department || '-'}</td>
+                    <td>${c.title || '-'}</td>
+                    <td><small><i class="fas fa-phone me-1 text-muted"></i>${c.phone || ''}<br><i class="fas fa-envelope me-1 text-muted"></i>${c.email || ''}</small></td>
+                    <td class="text-center">${primaryTag}</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-link text-primary me-2 p-0" title="Düzenle" onclick='editContact(${JSON.stringify(c)})'><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-link text-danger p-0" title="Sil" onclick="deleteContactFunc('${c.id}', '${c.customerId}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            });
+        } else { 
+            b.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Kayıtlı ilgili kişi bulunamadı.</td></tr>'; 
+        }
+    } catch (err) {
+        b.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">Veri yükleme hatası.</td></tr>';
     }
 }
 
 function openContactModal(mode) { 
     document.getElementById('contactForm').reset(); 
     document.getElementById('contId').value = ""; 
-    const modalEl = document.getElementById('contactModal');
-    const modal = new bootstrap.Modal(modalEl);
+    const modal = new bootstrap.Modal(document.getElementById('contactModal'));
     modal.show(); 
 }
 
@@ -145,15 +151,12 @@ function editContact(c) {
     document.getElementById('contPrimary').value = c.isPrimary || "Hayır";
     document.getElementById('contStatus').value = c.status || "Aktif";
     
-    const modalEl = document.getElementById('contactModal');
-    const modal = new bootstrap.Modal(modalEl);
+    const modal = new bootstrap.Modal(document.getElementById('contactModal'));
     modal.show();
 }
 
 async function saveContactData() {
     const custId = document.getElementById('dashboardCustId').value;
-    
-    // Veri toplama ve doğrulama
     const contactObj = {
         id: document.getElementById('contId').value,
         customerId: custId,
@@ -166,9 +169,7 @@ async function saveContactData() {
         status: document.getElementById('contStatus').value
     };
 
-    if(!contactObj.name) {
-        return Swal.fire("Uyarı", "Ad Soyad alanı boş bırakılamaz.", "warning");
-    }
+    if(!contactObj.name) return Swal.fire("Uyarı", "Ad Soyad alanı boş bırakılamaz.", "warning");
 
     showLoading();
     try {
@@ -177,13 +178,14 @@ async function saveContactData() {
             body: JSON.stringify({ 
                 action: "saveContact", 
                 contactData: contactObj, 
-                currentUser: currentUser // Nesne olarak gönderiyoruz, Main.gs içindeki düzeltmen ile isme dönüşecek
+                currentUser: currentUser // Nesne olarak gönderiyoruz, Main.gs name'i ayıklayacak
             }) 
         }).then(r => r.json());
 
         hideLoading();
         if(res.status === 'success') {
-            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('contactModal'));
+            const modalEl = document.getElementById('contactModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
             if(modalInstance) modalInstance.hide();
             
             fetchDetailContacts(custId);
@@ -200,7 +202,7 @@ async function saveContactData() {
 async function deleteContactFunc(id, customerId) {
     const r = await Swal.fire({ 
         title: 'Emin misiniz?', 
-        text: "Bu kişi kaydı kalıcı olarak silinecektir!", 
+        text: "Kişi kaydı silinecektir!", 
         icon: 'warning', 
         showCancelButton: true, 
         confirmButtonText: 'Evet, Sil',
@@ -210,21 +212,12 @@ async function deleteContactFunc(id, customerId) {
     if (r.isConfirmed) {
         showLoading();
         try {
-            const res = await fetch(API_URL, { 
-                method: "POST", 
-                body: JSON.stringify({ action: "deleteContact", contactId: id }) 
-            }).then(r => r.json());
-            
+            await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "deleteContact", contactId: id }) });
             hideLoading();
-            if(res.status === 'success') {
-                fetchDetailContacts(customerId);
-                Swal.fire('Silindi!', res.message, 'success');
-            } else {
-                Swal.fire('Hata!', res.message, 'error');
-            }
+            fetchDetailContacts(customerId);
         } catch (e) {
             hideLoading();
-            Swal.fire('Hata!', 'Bağlantı sorunu oluştu.', 'error');
+            Swal.fire('Hata!', 'İşlem başarısız.', 'error');
         }
     }
 }
