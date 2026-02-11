@@ -1,12 +1,12 @@
 /**
- * js/customers.js - HATA KORUMALI & TAM SÜRÜM
+ * js/customers.js - 17 SÜTUN TAM UYUMLU & HATA KORUMALI SÜRÜM
  */
 let globalSettings = { Musteri_Tipleri: [], Odeme_Sekilleri: [], Nakliye_Tipleri: [] };
 
 function showLoading() { document.getElementById('loadingOverlay').style.display = 'flex'; }
 function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
 
-// Element değerini güvenli bir şekilde atayan yardımcı fonksiyon
+// HATA ÖNLEYİCİ: Element varsa değer atar, yoksa kodu bozmaz.
 const setVal = (id, val) => {
     const el = document.getElementById(id);
     if (el) el.value = val || "";
@@ -26,13 +26,15 @@ function populateSelect(selectId, items, selectedValue = "") {
     const select = document.getElementById(selectId);
     if(!select) return;
     select.innerHTML = '<option value="">Seçiniz</option>';
-    items.forEach(item => {
-        const opt = document.createElement('option');
-        opt.value = item;
-        opt.innerText = item;
-        if(item === selectedValue) opt.selected = true;
-        select.appendChild(opt);
-    });
+    if(items) {
+        items.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item;
+            opt.innerText = item;
+            if(item === selectedValue) opt.selected = true;
+            select.appendChild(opt);
+        });
+    }
 }
 
 async function loadCustomersModule() {
@@ -125,7 +127,6 @@ function filterCustomers() {
 async function openCustomerDetail(id) {
     showLoading();
     try {
-        // Ayarlar yoksa çek
         if(globalSettings.Musteri_Tipleri.length === 0) await fetchSettings();
 
         const modalDiv = document.getElementById('customerDetailModal');
@@ -153,7 +154,7 @@ async function openCustomerDetail(id) {
             if(res.status === 'success') {
                 const d = res.data;
                 
-                // Formu güvenli doldur (Eksik ID olsa bile çökmez)
+                // Formu güvenli doldur (17 sütun yapısı ile uyumlu)
                 setVal('custId', d.id);
                 setVal('custName', d.name);
                 setVal('custStatus', d.status);
@@ -178,8 +179,8 @@ async function openCustomerDetail(id) {
         }
     } catch (error) {
         hideLoading();
-        console.error("Modal açma hatası:", error);
-        Swal.fire('Sistem Hatası', 'Beklenmedik bir hata oluştu.', 'error');
+        console.error("Modal hatası:", error);
+        Swal.fire('Hata', 'İşlem sırasında bir hata oluştu.', 'error');
     }
 }
 
@@ -215,6 +216,7 @@ async function saveCustomerData() {
             const modalInstance = bootstrap.Modal.getInstance(modalEl);
             if(modalInstance) modalInstance.hide();
             
+            // Dashboard açıksa orayı, değilse listeyi yenile
             if(document.getElementById('customerDashboardHeader')) { 
                 showCustomerDashboard(payload.id); 
             } else { 
