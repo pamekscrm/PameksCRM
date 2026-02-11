@@ -1,24 +1,24 @@
 /**
- * js/tasks.js - GÖREV YÖNETİM MANTIĞI
+ * js/tasks.js - SAAT VE SERBEST METİN DESTEKLİ GÖREV YÖNETİMİ
  */
 
 async function fetchDetailTasks(customerId) {
     const container = document.getElementById('tab-tasks');
     if(!container) return;
 
-    // Arayüz iskeletini oluştur
+    // Arayüz iskeletini oluştur (Header güncellendi)
     container.innerHTML = `
         <div class="d-flex justify-content-between mb-3 align-items-center">
-            <h6 class="m-0 fw-bold text-dark">Müşteri Görevleri</h6>
+            <h6 class="m-0 fw-bold text-dark">Görevler</h6>
             <button class="btn btn-sm btn-primary" onclick="openTaskModal('new')"><i class="fas fa-plus me-1"></i> Yeni Görev</button>
         </div>
         <div class="table-responsive">
             <table class="table table-sm table-hover align-middle">
                 <thead class="table-light small text-uppercase fw-bold">
                     <tr>
-                        <th>Tip/Konu</th>
+                        <th>Görev</th>
                         <th>Sorumlu</th>
-                        <th>Bitiş Tarihi</th>
+                        <th>Başlangıç / Bitiş</th>
                         <th>Durum</th>
                         <th class="text-end">İşlem</th>
                     </tr>
@@ -40,11 +40,14 @@ async function fetchDetailTasks(customerId) {
 
         if(res.status === "success" && res.data.length > 0) {
             res.data.forEach(t => {
-                // Öncelik rengi
                 let pColor = t.priority === 'Yüksek' ? 'danger' : (t.priority === 'Orta' ? 'warning' : 'info');
                 
-                // Tarih formatla
-                let dateStr = t.end ? new Date(t.end).toLocaleDateString('tr-TR') : '-';
+                // Tarih ve Saat formatlama (Örn: 11.02.2026 10:30)
+                const fmtDate = (date) => {
+                    if(!date) return '-';
+                    const d = new Date(date);
+                    return d.toLocaleDateString('tr-TR') + ' ' + d.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
+                };
                 
                 tbody.innerHTML += `
                     <tr class="small">
@@ -55,7 +58,7 @@ async function fetchDetailTasks(customerId) {
                             </div>
                         </td>
                         <td>${t.assigned || '-'}</td>
-                        <td>${dateStr}</td>
+                        <td><small>${fmtDate(t.start)}<br>${fmtDate(t.end)}</small></td>
                         <td><span class="badge bg-light text-dark border">${t.status}</span></td>
                         <td class="text-end">
                             <button class="btn btn-sm btn-link text-primary me-2 p-0" title="Düzenle" onclick='editTask(${JSON.stringify(t)})'><i class="fas fa-edit"></i></button>
@@ -64,7 +67,7 @@ async function fetchDetailTasks(customerId) {
                     </tr>`;
             });
         } else { 
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Bu müşteriye ait aktif görev bulunamadı.</td></tr>'; 
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Kayıtlı görev bulunamadı.</td></tr>'; 
         }
     } catch (err) {
         document.getElementById('detailTaskBody').innerHTML = '<tr><td colspan="5" class="text-center text-danger py-4">Görevler yüklenirken hata oluştu.</td></tr>';
@@ -79,12 +82,20 @@ function openTaskModal(mode) {
 }
 
 function editTask(t) {
+    document.getElementById('taskForm').reset();
     document.getElementById('taskId').value = t.id;
     document.getElementById('taskType').value = t.type;
     
-    // HTML date input için YYYY-MM-DD formatı gerekir
-    if(t.start) document.getElementById('taskStart').value = new Date(t.start).toISOString().split('T')[0];
-    if(t.end) document.getElementById('taskEnd').value = new Date(t.end).toISOString().split('T')[0];
+    // datetime-local inputu için YYYY-MM-DDTHH:mm formatı gerekir
+    const toLocalISO = (dateStr) => {
+        if(!dateStr) return "";
+        const date = new Date(dateStr);
+        const pad = (num) => String(num).padStart(2, '0');
+        return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    };
+
+    document.getElementById('taskStart').value = toLocalISO(t.start);
+    document.getElementById('taskEnd').value = toLocalISO(t.end);
     
     document.getElementById('taskPriority').value = t.priority;
     document.getElementById('taskStatus').value = t.status;
@@ -109,6 +120,8 @@ async function saveTaskData() {
         desc: document.getElementById('taskDesc').value
     };
 
+    if(!taskObj.type) return Swal.fire("Uyarı", "Görev / Konu alanı boş bırakılamaz.", "warning");
+
     showLoading();
     try {
         const res = await fetch(API_URL, { 
@@ -122,7 +135,8 @@ async function saveTaskData() {
 
         hideLoading();
         if(res.status === 'success') {
-            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('taskModal'));
+            const modalEl = document.getElementById('taskModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
             if(modalInstance) modalInstance.hide();
             
             fetchDetailTasks(custId);
