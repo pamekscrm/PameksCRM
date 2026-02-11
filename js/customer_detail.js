@@ -1,5 +1,5 @@
 /**
- * js/customer_detail.js - NOTLAR SEKMESİ ENTEGRE EDİLMİŞ TAM SÜRÜM
+ * js/customer_detail.js - EKLER SEKMESİ ENTEGRE EDİLMİŞ TAM SÜRÜM
  */
 
 async function showCustomerDashboard(id) {
@@ -66,6 +66,9 @@ async function showCustomerDashboard(id) {
                                 <li class="nav-item">
                                     <button class="nav-link py-3 px-4 fw-bold" id="notes-tab-btn" data-bs-toggle="tab" data-bs-target="#tab-notes" onclick="fetchDetailNotes('${d.id}')">Notlar</button>
                                 </li>
+                                <li class="nav-item">
+                                    <button class="nav-link py-3 px-4 fw-bold" id="attachments-tab-btn" data-bs-toggle="tab" data-bs-target="#tab-attachments" onclick="fetchDetailAttachments('${d.id}')">Ekler</button>
+                                </li>
                             </ul>
                         </div>
                         <div class="card-body p-4 tab-content">
@@ -90,10 +93,9 @@ async function showCustomerDashboard(id) {
                                     </table>
                                 </div>
                             </div>
-                            <div class="tab-pane fade" id="tab-tasks">
-                                </div>
-                            <div class="tab-pane fade" id="tab-notes">
-                                </div>
+                            <div class="tab-pane fade" id="tab-tasks"></div>
+                            <div class="tab-pane fade" id="tab-notes"></div>
+                            <div class="tab-pane fade" id="tab-attachments"></div>
                         </div>
                     </div>
                 </div>
