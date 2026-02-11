@@ -1,14 +1,16 @@
 /**
- * MÜŞTERİ YÖNETİMİ - MODERN & MOBİL UYUMLU
+ * MÜŞTERİ YÖNETİMİ - MODERN & MOBİL UYUMLU (v2)
  */
 
 // YÜKLEME EKRANI KONTROLLERİ
 function showLoading() {
-    document.getElementById('loadingOverlay').style.display = 'flex';
+    const overlay = document.getElementById('loadingOverlay');
+    if(overlay) overlay.style.display = 'flex';
 }
 
 function hideLoading() {
-    document.getElementById('loadingOverlay').style.display = 'none';
+    const overlay = document.getElementById('loadingOverlay');
+    if(overlay) overlay.style.display = 'none';
 }
 
 // Müşteri Listesini Yükle
@@ -16,7 +18,7 @@ function loadCustomersModule() {
     const contentDiv = document.getElementById('dynamicContent');
     const titleDiv = document.getElementById('pageTitle');
     
-    titleDiv.innerText = "Müşteri Listesi";
+    if(titleDiv) titleDiv.innerText = "Müşteri Listesi";
     
     // Mobil uyumlu kart tasarımı ve tablo
     contentDiv.innerHTML = `
@@ -59,8 +61,8 @@ function loadCustomersModule() {
 }
 
 function fetchCustomers() {
-    // Spinner göstermiyoruz çünkü sayfa içi yükleme, kullanıcıyı kilitlemesin
     const tbody = document.getElementById('customerTableBody');
+    // Tablo içi spinner
     tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4"><div class="spinner-border text-primary"></div></td></tr>`;
 
     fetch(API_URL, {
@@ -110,7 +112,8 @@ function fetchCustomers() {
 }
 
 function openCustomerDetail(id) {
-    const modal = new bootstrap.Modal(document.getElementById('customerDetailModal'));
+    const modalElement = document.getElementById('customerDetailModal');
+    const modal = new bootstrap.Modal(modalElement);
     document.getElementById('customerForm').reset();
     
     if (id === 'new') {
@@ -119,7 +122,7 @@ function openCustomerDetail(id) {
         modal.show();
     } else {
         document.getElementById('modalTitle').innerText = "Müşteri Düzenle";
-        showLoading(); // Detay çekerken kilitle
+        showLoading(); // EKRANI KİLİTLE (SPINNER)
         
         fetch(API_URL, {
             method: "POST",
@@ -127,13 +130,12 @@ function openCustomerDetail(id) {
         })
         .then(r => r.json())
         .then(res => {
-            hideLoading();
+            hideLoading(); // SPINNER KAPAT
             if(res.status === 'success') {
                 const d = res.data;
                 document.getElementById('custId').value = d.id;
                 document.getElementById('custName').value = d.name;
                 
-                // Dinamik Select Değerlerini Kontrol Et (Listede yoksa ekle)
                 ensureOptionExists('custType', d.type);
                 document.getElementById('custType').value = d.type;
 
@@ -161,14 +163,13 @@ function openCustomerDetail(id) {
 }
 
 function saveCustomerData() {
-    // Form Doğrulama (Basit)
     const name = document.getElementById('custName').value;
     if(!name) {
         Swal.fire('Eksik Bilgi', 'Lütfen Firma Adını giriniz.', 'warning');
         return;
     }
 
-    showLoading(); // İşlem Başladı - Spinner Aç
+    showLoading(); // EKRANI KİLİTLE (SPINNER)
 
     const currentUser = JSON.parse(sessionStorage.getItem('crmUser'));
 
@@ -196,9 +197,10 @@ function saveCustomerData() {
     })
     .then(r => r.json())
     .then(res => {
-        hideLoading(); // İşlem Bitti - Spinner Kapat
+        hideLoading(); // SPINNER KAPAT
 
         if(res.status === 'success') {
+            // MODERN BAŞARI MESAJI (SweetAlert2)
             Swal.fire({
                 title: 'Başarılı!',
                 text: res.message,
@@ -210,7 +212,7 @@ function saveCustomerData() {
             const modalEl = document.getElementById('customerDetailModal');
             const modal = bootstrap.Modal.getInstance(modalEl);
             modal.hide();
-            fetchCustomers(); // Listeyi sessizce yenile
+            fetchCustomers(); 
         } else {
             Swal.fire('Hata', res.message, 'error');
         }
@@ -233,7 +235,7 @@ function deleteCustomerFunc(id) {
         cancelButtonText: 'Vazgeç'
     }).then((result) => {
         if (result.isConfirmed) {
-            showLoading(); // Spinner Aç
+            showLoading(); // SPINNER AÇ
 
             fetch(API_URL, {
                 method: "POST",
@@ -241,7 +243,7 @@ function deleteCustomerFunc(id) {
             })
             .then(r => r.json())
             .then(res => {
-                hideLoading(); // Spinner Kapat
+                hideLoading(); // SPINNER KAPAT
 
                 if (res.status === 'success') {
                     Swal.fire('Silindi!', res.message, 'success');
@@ -259,8 +261,6 @@ function deleteCustomerFunc(id) {
 }
 
 // --- DİNAMİK DROPDOWN YÖNETİMİ ---
-
-// Yeni Seçenek Ekleme Fonksiyonu (SweetAlert ile)
 function addNewOption(selectId, title) {
     Swal.fire({
         title: title,
@@ -270,32 +270,13 @@ function addNewOption(selectId, title) {
         confirmButtonText: 'Ekle',
         cancelButtonText: 'İptal',
         inputValidator: (value) => {
-            if (!value) {
-                return 'Bir değer yazmalısınız!';
-            }
+            if (!value) return 'Bir değer yazmalısınız!';
         }
     }).then((result) => {
         if (result.isConfirmed && result.value) {
             const select = document.getElementById(selectId);
             const newValue = result.value;
-
-            // Zaten var mı kontrol et
-            let exists = false;
-            for(let i=0; i<select.options.length; i++) {
-                if(select.options[i].value === newValue) {
-                    exists = true;
-                    break;
-                }
-            }
-
-            if(!exists) {
-                const opt = document.createElement('option');
-                opt.value = newValue;
-                opt.innerHTML = newValue;
-                select.appendChild(opt);
-            }
-            
-            // Yeni değeri seç
+            ensureOptionExists(selectId, newValue);
             select.value = newValue;
             
             const Toast = Swal.mixin({
@@ -309,7 +290,6 @@ function addNewOption(selectId, title) {
     });
 }
 
-// Eğer backend'den listede olmayan bir değer gelirse onu listeye ekle
 function ensureOptionExists(selectId, value) {
     if(!value) return;
     const select = document.getElementById(selectId);
