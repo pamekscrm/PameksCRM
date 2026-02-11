@@ -9,7 +9,6 @@
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     
     <script>
-        // TOKEN KONTROLÜ
         if (!sessionStorage.getItem('crmToken')) {
             window.location.href = 'index.html';
         }
@@ -80,318 +79,6 @@
         <div id="dynamicContent"></div>
     </main>
 
-    <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog border-0">
-            <div class="modal-content shadow">
-                <div class="modal-header bg-light">
-                    <h5 class="modal-title fw-bold">Kullanıcı Kartı</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="userForm">
-                        <input type="hidden" id="userId">
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">Ad Soyad</label>
-                            <input type="text" class="form-control" id="uName" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">Kullanıcı Adı</label>
-                            <input type="text" class="form-control" id="uUsername" required autocomplete="username">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">Şifre</label>
-                            <input type="password" class="form-control" id="uPassword" placeholder="Değiştirmek istemiyorsanız boş bırakın" autocomplete="new-password">
-                        </div>
-                        <div class="row">
-                            <div class="col-6 mb-3">
-                                <label class="form-label small fw-bold">Rol</label>
-                                <select class="form-select" id="uRole">
-                                    <option value="personel">Personel</option>
-                                    <option value="admin">Admin</option>
-                                </select>
-                            </div>
-                            <div class="col-6 mb-3">
-                                <label class="form-label small fw-bold">Durum</label>
-                                <select class="form-select" id="uStatus">
-                                    <option value="Aktif">Aktif</option>
-                                    <option value="Pasif">Pasif</option>
-                                </select>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-primary px-4" onclick="saveUserData()">Kaydet</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="customerDetailModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-light">
-                    <h5 class="modal-title fw-bold" id="modalTitle">Müşteri Formu</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <form id="customerForm">
-                        <input type="hidden" id="custId">
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold">Firma Adı *</label>
-                                <input type="text" class="form-control" id="custName" required>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label small fw-bold">Tip</label>
-                                <select class="form-select" id="custType"></select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label small fw-bold">Durum</label>
-                                <select class="form-select" id="custStatus">
-                                    <option value="Aktif">Aktif</option>
-                                    <option value="Pasif">Pasif</option>
-                                    <option value="Aday">Aday</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-4">
-                                <label class="form-label small fw-bold">Ülke</label>
-                                <input type="text" class="form-control" id="custCountry">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label small fw-bold">Şehir</label>
-                                <input type="text" class="form-control" id="custCity">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label small fw-bold">Telefon</label>
-                                <input type="tel" class="form-control" id="custPhone">
-                            </div>
-                        </div>
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold">E-Posta</label>
-                                <input type="email" class="form-control" id="custEmail">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold">Web Sitesi</label>
-                                <input type="url" class="form-control" id="custWeb">
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">Adres</label>
-                            <textarea class="form-control" id="custAddress" rows="2"></textarea>
-                        </div>
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold">Ödeme Şekli</label>
-                                <select class="form-select" id="custPayment"></select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold">Nakliye Tipi</label>
-                                <select class="form-select" id="custShipping"></select>
-                            </div>
-                        </div>
-                        <div class="mb-0">
-                            <label class="form-label small fw-bold">Not Özeti</label>
-                            <textarea class="form-control" id="custNotes" rows="2"></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
-                    <button type="button" class="btn btn-primary px-4" id="btnSaveCustomer" onclick="saveCustomerData()">Kaydet</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="contactModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content shadow border-0">
-                <div class="modal-header">
-                    <h6 class="modal-title fw-bold">Kişi Bilgileri</h6>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="contactForm">
-                        <input type="hidden" id="contId">
-                        <div class="mb-2">
-                            <label class="small fw-bold">Ad Soyad *</label>
-                            <input type="text" id="contName" class="form-control" required>
-                        </div>
-                        <div class="row g-2 mb-2">
-                            <div class="col-6">
-                                <label class="small fw-bold">Departman</label>
-                                <input type="text" id="contDept" class="form-control">
-                            </div>
-                            <div class="col-6">
-                                <label class="small fw-bold">Ünvan</label>
-                                <input type="text" id="contTitle" class="form-control">
-                            </div>
-                        </div>
-                        <div class="row g-2 mb-2">
-                            <div class="col-6">
-                                <label class="small fw-bold">Telefon</label>
-                                <input type="tel" id="contPhone" class="form-control">
-                            </div>
-                            <div class="col-6">
-                                <label class="small fw-bold">E-Posta</label>
-                                <input type="email" id="contEmail" class="form-control">
-                            </div>
-                        </div>
-                        <div class="row g-2">
-                            <div class="col-6">
-                                <label class="small fw-bold">Birincil</label>
-                                <select id="contPrimary" class="form-select">
-                                    <option value="Hayır">Hayır</option>
-                                    <option value="Evet">Evet</option>
-                                </select>
-                            </div>
-                            <div class="col-6">
-                                <label class="small fw-bold">Durum</label>
-                                <select id="contStatus" class="form-select">
-                                    <option value="Aktif">Aktif</option>
-                                    <option value="Pasif">Pasif</option>
-                                </select>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary w-100" onclick="saveContactData()">Kişiyi Kaydet</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="taskModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content shadow border-0">
-                <div class="modal-header bg-light">
-                    <h6 class="modal-title fw-bold">Görev Detayı</h6>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="taskForm">
-                        <input type="hidden" id="taskId">
-                        <div class="mb-3">
-                            <label class="small fw-bold">Görev / Konu *</label>
-                            <input type="text" id="taskType" class="form-control" placeholder="Örn: Müşteri Ziyareti veya Toplantı">
-                        </div>
-                        <div class="row g-2 mb-3">
-                            <div class="col-6">
-                                <label class="small fw-bold">Başlangıç Tarihi ve Saat</label>
-                                <input type="datetime-local" id="taskStart" class="form-control">
-                            </div>
-                            <div class="col-6">
-                                <label class="small fw-bold">Bitiş Tarihi ve Saat</label>
-                                <input type="datetime-local" id="taskEnd" class="form-control">
-                            </div>
-                        </div>
-                        <div class="row g-2 mb-3">
-                            <div class="col-6">
-                                <label class="small fw-bold">Öncelik</label>
-                                <select id="taskPriority" class="form-select">
-                                    <option value="Orta">Orta</option>
-                                    <option value="Yüksek">Yüksek</option>
-                                    <option value="Düşük">Düşük</option>
-                                </select>
-                            </div>
-                            <div class="col-6">
-                                <label class="small fw-bold">Durum</label>
-                                <select id="taskStatus" class="form-select">
-                                    <option value="Açık">Açık</option>
-                                    <option value="Devam Ediyor">Devam Ediyor</option>
-                                    <option value="Tamamlandı">Tamamlandı</option>
-                                    <option value="İptal">İptal</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="small fw-bold">Sorumlu (Kullanıcı)</label>
-                            <input type="text" id="taskAssigned" class="form-control" placeholder="Atanan kişi">
-                        </div>
-                        <div class="mb-0">
-                            <label class="small fw-bold">Açıklama</label>
-                            <textarea id="taskDesc" class="form-control" rows="3" placeholder="Görev detaylarını buraya yazın..."></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary w-100 fw-bold" onclick="saveTaskData()">Görevi Kaydet</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="noteModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content shadow border-0">
-                <div class="modal-header bg-light">
-                    <h6 class="modal-title fw-bold">Not Ekle/Düzenle</h6>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="noteForm">
-                        <input type="hidden" id="noteId">
-                        <div class="mb-3">
-                            <label class="small fw-bold">Tarih ve Saat</label>
-                            <input type="datetime-local" id="noteDate" class="form-control">
-                        </div>
-                        <div class="mb-3">
-                            <label class="small fw-bold">Başlık *</label>
-                            <input type="text" id="noteTitle" class="form-control" placeholder="Not başlığı" required>
-                        </div>
-                        <div class="mb-0">
-                            <label class="small fw-bold">İçerik</label>
-                            <textarea id="noteContent" class="form-control" rows="5" placeholder="Not içeriği..."></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary w-100 fw-bold" onclick="saveNoteData()">Notu Kaydet</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="attachmentModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content shadow border-0">
-                <div class="modal-header bg-light">
-                    <h6 class="modal-title fw-bold">Dosya Ekle</h6>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="attachmentForm">
-                        <input type="hidden" id="attId">
-                        <div class="mb-3">
-                            <label class="small fw-bold">Dosya Seçin (Maks 3MB) *</label>
-                            <input type="file" id="attFile" class="form-control" accept=".pdf,image/*,.doc,.docx,.xls,.xlsx" required>
-                            <div class="form-text small text-muted">Kabul edilenler: PDF, Resim, Word, Excel</div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="small fw-bold">Etiket</label>
-                            <input type="text" id="attTag" class="form-control" placeholder="Örn: Sözleşme, Fatura">
-                        </div>
-                        <div class="mb-0">
-                            <label class="small fw-bold">Açıklama</label>
-                            <textarea id="attDesc" class="form-control" rows="3" placeholder="Dosya hakkında kısa bilgi..."></textarea>
-                        </div>
-                        <div id="uploadProgress" class="mt-3 text-center d-none">
-                            <div class="spinner-border spinner-border-sm text-primary"></div> <small>Dosya işleniyor...</small>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary w-100 fw-bold" onclick="processFileUpload()">Yüklemeyi Başlat</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="modal fade" id="quotationModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content shadow border-0">
@@ -402,10 +89,11 @@
                 <div class="modal-body">
                     <form id="quotationForm">
                         <input type="hidden" id="quoteId">
+                        
                         <div class="row g-2 mb-3">
                             <div class="col-md-4">
                                 <label class="small fw-bold">Teklif No *</label>
-                                <input type="text" id="quoteNo" class="form-control" placeholder="Örn: 2024-001" required>
+                                <input type="text" id="quoteNo" class="form-control" placeholder="Örn: 2026-001" required>
                             </div>
                             <div class="col-md-4">
                                 <label class="small fw-bold">Model Kodu</label>
@@ -413,18 +101,26 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="small fw-bold">Kumaş</label>
-                                <input type="text" id="quoteFabric" class="form-control" placeholder="Örn: Pamuk/Polyester">
+                                <input type="text" id="quoteFabric" class="form-control" placeholder="Örn: Pamuk">
                             </div>
                         </div>
+
                         <div class="row g-2 mb-3">
                             <div class="col-md-4">
-                                <label class="small fw-bold">Adet</label>
-                                <input type="number" id="quoteQuantity" class="form-control" value="0">
+                                <label class="small fw-bold text-primary">Talep Fiyat (Müşteri)</label>
+                                <input type="number" step="0.01" id="quoteTargetPrice" class="form-control" placeholder="Hedef fiyat">
                             </div>
                             <div class="col-md-4">
-                                <label class="small fw-bold text-danger">Birim Fiyat *</label>
-                                <input type="number" step="0.01" id="quoteUnitPrice" class="form-control" placeholder="Pazarlık rakamı" required>
+                                <label class="small fw-bold text-danger">Teklif Fiyat (Bizim)</label>
+                                <input type="number" step="0.01" id="quoteOfferedPrice" class="form-control" placeholder="Verilen teklif">
                             </div>
+                            <div class="col-md-4">
+                                <label class="small fw-bold text-success">Onay Fiyat (Final)</label>
+                                <input type="number" step="0.01" id="quoteAgreedPrice" class="form-control" placeholder="El sıkışılan">
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-3">
                             <div class="col-md-4">
                                 <label class="small fw-bold">Para Birimi</label>
                                 <select id="quoteCurrency" class="form-select">
@@ -433,8 +129,6 @@
                                     <option value="TRY">TRY (₺)</option>
                                 </select>
                             </div>
-                        </div>
-                        <div class="row g-2 mb-3">
                             <div class="col-md-4">
                                 <label class="small fw-bold">Teklif Tarihi</label>
                                 <input type="date" id="quoteDate" class="form-control">
@@ -443,30 +137,34 @@
                                 <label class="small fw-bold">Geçerlilik Tarihi</label>
                                 <input type="date" id="quoteValidUntil" class="form-control">
                             </div>
+                        </div>
+
+                        <div class="row g-2 mb-3">
                             <div class="col-md-4">
                                 <label class="small fw-bold">Termin Tarihi</label>
                                 <input type="date" id="quoteLeadTime" class="form-control">
                             </div>
+                            <div class="col-md-8">
+                                <label class="small fw-bold">Sonuç / Durum</label>
+                                <select id="quoteResult" class="form-select">
+                                    <option value="Açık">Açık / Pazarlıkta</option>
+                                    <option value="Revize Edildi">Revize Edildi</option>
+                                    <option value="Müşteri Yanıtı Bekleniyor">Müşteri Yanıtı Bekleniyor</option>
+                                    <option value="Onaylandı">Onaylandı</option>
+                                    <option value="Reddedildi">Reddedildi</option>
+                                    <option value="İptal">İptal</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="small fw-bold">Sonuç / Durum</label>
-                            <select id="quoteResult" class="form-select">
-                                <option value="Açık">Açık / Pazarlıkta</option>
-                                <option value="Revize Edildi">Revize Edildi</option>
-                                <option value="Müşteri Yanıtı Bekleniyor">Müşteri Yanıtı Bekleniyor</option>
-                                <option value="Onaylandı">Onaylandı</option>
-                                <option value="Reddedildi">Reddedildi</option>
-                                <option value="İptal">İptal</option>
-                            </select>
-                        </div>
+
                         <div class="mb-0">
                             <label class="small fw-bold">Notlar / Pazarlık Geçmişi</label>
-                            <textarea id="quoteDesc" class="form-control" rows="4" placeholder="Müşterinin talepleri veya pazarlık süreci notları..."></textarea>
+                            <textarea id="quoteDesc" class="form-control" rows="4" placeholder="Pazarlık süreci notları..."></textarea>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary w-100 fw-bold" onclick="saveQuotationData()">Teklifi Kaydet / Revize Et</button>
+                    <button type="button" class="btn btn-primary w-100 fw-bold" onclick="saveQuotationData()">Değişiklikleri Kaydet / Revize Et</button>
                 </div>
             </div>
         </div>
@@ -476,11 +174,10 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script src="js/customers.js?v=1004"></script>
-    <script src="js/customer_detail.js?v=1004"></script>
-    <script src="js/tasks.js?v=1005"></script>
+    <script src="js/customer_detail.js?v=1008"></script> <script src="js/tasks.js?v=1005"></script>
     <script src="js/notes.js?v=1006"></script>
     <script src="js/attachments.js?v=1007"></script>
-    <script src="js/quotations.js?v=1008"></script> <script src="js/settings.js?v=1004"></script>
+    <script src="js/quotations.js?v=1009"></script> <script src="js/settings.js?v=1004"></script>
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbzAhbgVIadsmA7sBzgm69gE9fi6ZZJX9jV8YCAF_r_eJML5vgqfTZ0eq34h2OqMkdEGIA/exec";
@@ -502,12 +199,8 @@
         function toggleSidebar() {
             const s = document.getElementById('sidebar');
             const m = document.getElementById('mainContent');
-            if (window.innerWidth < 768) { 
-                s.classList.toggle('active'); 
-            } else { 
-                s.classList.toggle('closed'); 
-                m.classList.toggle('expanded'); 
-            }
+            if (window.innerWidth < 768) { s.classList.toggle('active'); } 
+            else { s.classList.toggle('closed'); m.classList.toggle('expanded'); }
         }
 
         function logout() { 
@@ -518,12 +211,7 @@
                 showCancelButton: true,
                 confirmButtonText: 'Evet',
                 cancelButtonText: 'Hayır'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    sessionStorage.clear(); 
-                    window.location.href = 'index.html'; 
-                }
-            });
+            }).then((result) => { if (result.isConfirmed) { sessionStorage.clear(); window.location.href = 'index.html'; } });
         }
 
         document.addEventListener('DOMContentLoaded', () => loadModule('customers'));
