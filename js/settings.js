@@ -4,7 +4,9 @@
 async function loadSettingsModule() {
     const contentDiv = document.getElementById('dynamicContent');
     document.getElementById('pageTitle').innerText = "Sistem Ayarları";
-    const userRole = (currentUser.role || "").toLowerCase();
+    
+    // ROLÜ KÜÇÜK HARFE ÇEVİREREK KONTROL ET (Garantili yöntem)
+    const userRole = (currentUser.role || "").toString().trim().toLowerCase();
 
     contentDiv.innerHTML = `
         <div class="row g-4">
@@ -46,8 +48,16 @@ async function loadSettingsModule() {
         </div>`;
 
     fetchAndRenderSettings();
-    if (userRole === "admin") fetchAndRenderUsers();
-    else document.getElementById('adminUserSection').innerHTML = `<div class="card shadow-sm border-0 h-100 bg-light p-5 text-center text-muted"><i class="fas fa-lock fa-3x mb-3"></i><h6>Sadece Admin görebilir.</h6></div>`;
+    if (userRole === "admin") {
+        fetchAndRenderUsers();
+    } else {
+        document.getElementById('adminUserSection').innerHTML = `
+            <div class="card shadow-sm border-0 h-100 bg-light p-5 text-center text-muted">
+                <i class="fas fa-lock fa-3x mb-3"></i>
+                <h6>Kullanıcı yönetimi sadece Admin'e açıktır.</h6>
+                <small>Mevcut Rolünüz: ${currentUser.role}</small>
+            </div>`;
+    }
 }
 
 async function fetchAndRenderSettings() {
