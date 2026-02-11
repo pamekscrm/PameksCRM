@@ -1,5 +1,5 @@
 /**
- * js/customer_detail.js - TEKLİFLER VE PAZARLIK SEKMESİ ENTEGRE EDİLMİŞ TAM SÜRÜM
+ * js/customer_detail.js - ÜÇLÜ FİYAT VE HATA DÜZELTMELİ TAM SÜRÜM
  */
 
 async function showCustomerDashboard(id) {
@@ -111,7 +111,7 @@ async function showCustomerDashboard(id) {
 }
 
 /**
- * TEKLİFLERİ LİSTELEME
+ * TEKLİFLERİ LİSTELEME (ÜÇLÜ FİYAT GÜNCELLEMESİ)
  */
 async function fetchDetailQuotations(customerId) {
     const container = document.getElementById('tab-quotations');
@@ -125,19 +125,20 @@ async function fetchDetailQuotations(customerId) {
             </button>
         </div>
         <div class="table-responsive">
-            <table class="table table-sm table-hover align-middle">
+            <table class="table table-sm table-hover align-middle text-nowrap">
                 <thead class="table-light small text-uppercase fw-bold">
                     <tr>
                         <th>Teklif No / Model</th>
-                        <th>Kumaş / Adet</th>
-                        <th>Birim Fiyat</th>
-                        <th>Toplam</th>
+                        <th>Kumaş</th>
+                        <th class="text-primary">Talep</th>
+                        <th class="text-danger">Teklif</th>
+                        <th class="text-success">Onay</th>
                         <th>Sonuç</th>
                         <th class="text-end">İşlem</th>
                     </tr>
                 </thead>
                 <tbody id="detailQuotationBody">
-                    <tr><td colspan="6" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>
+                    <tr><td colspan="7" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>
                 </tbody>
             </table>
         </div>`;
@@ -160,24 +161,22 @@ async function fetchDetailQuotations(customerId) {
                             <span class="fw-bold text-primary">${q.quoteNo}</span><br>
                             <small class="text-muted">${q.modelCode || '-'}</small>
                         </td>
-                        <td>
-                            <small>${q.fabric || '-'}</small><br>
-                            <span class="small fw-bold">${q.quantity} Adet</span>
-                        </td>
-                        <td class="fw-bold">${q.unitPrice} ${q.currency}</td>
-                        <td class="fw-bold text-success">${q.totalAmount} ${q.currency}</td>
+                        <td><small>${q.fabric || '-'}</small></td>
+                        <td class="fw-bold text-primary">${q.targetPrice || '0'} ${q.currency}</td>
+                        <td class="fw-bold text-danger">${q.offeredPrice || '0'} ${q.currency}</td>
+                        <td class="fw-bold text-success">${q.agreedPrice || '0'} ${q.currency}</td>
                         <td>${statusBadge}</td>
                         <td class="text-end">
-                            <button class="btn btn-sm btn-link text-primary me-2 p-0" title="Pazarlık / Düzenle" onclick='editQuotation(${JSON.stringify(q)})'><i class="fas fa-handshake"></i></button>
+                            <button class="btn btn-sm btn-link text-primary me-2 p-0" title="Pazarlık" onclick='editQuotation(${JSON.stringify(q)})'><i class="fas fa-handshake fa-lg"></i></button>
                             <button class="btn btn-sm btn-link text-danger p-0" title="Sil" onclick="deleteQuotationFunc('${q.id}', '${customerId}')"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>`;
             });
         } else { 
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Henüz teklif oluşturulmamış.</td></tr>'; 
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">Henüz teklif oluşturulmamış.</td></tr>'; 
         }
     } catch (err) {
-        document.getElementById('detailQuotationBody').innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">Teklifler yüklenirken hata oluştu.</td></tr>';
+        document.getElementById('detailQuotationBody').innerHTML = '<tr><td colspan="7" class="text-center text-danger py-4">Teklifler yüklenirken hata oluştu.</td></tr>';
     }
 }
 
@@ -191,7 +190,7 @@ function getQuotationStatusBadge(status) {
 }
 
 /**
- * İLETİŞİM KİŞİLERİ (MEVCUT FONKSİYONLAR)
+ * İLETİŞİM KİŞİLERİ
  */
 async function fetchDetailContacts(customerId) {
     const b = document.getElementById('detailContactBody');
@@ -232,4 +231,90 @@ async function fetchDetailContacts(customerId) {
     }
 }
 
-// ... (Kişi modal ve silme fonksiyonları aynı kalır)
+function openContactModal(mode) { 
+    document.getElementById('contactForm').reset(); 
+    document.getElementById('contId').value = ""; 
+    const modal = new bootstrap.Modal(document.getElementById('contactModal'));
+    modal.show(); 
+}
+
+function editContact(c) {
+    document.getElementById('contId').value = c.id;
+    document.getElementById('contName').value = c.name;
+    document.getElementById('contDept').value = c.department || "";
+    document.getElementById('contTitle').value = c.title || "";
+    document.getElementById('contPhone').value = c.phone || "";
+    document.getElementById('contEmail').value = c.email || "";
+    document.getElementById('contPrimary').value = c.isPrimary || "Hayır";
+    document.getElementById('contStatus').value = c.status || "Aktif";
+    
+    const modal = new bootstrap.Modal(document.getElementById('contactModal'));
+    modal.show();
+}
+
+async function saveContactData() {
+    const custId = document.getElementById('dashboardCustId').value;
+    const contactObj = {
+        id: document.getElementById('contId').value,
+        customerId: custId,
+        name: document.getElementById('contName').value.trim(),
+        department: document.getElementById('contDept').value.trim(),
+        title: document.getElementById('contTitle').value.trim(),
+        phone: document.getElementById('contPhone').value.trim(),
+        email: document.getElementById('contEmail').value.trim(),
+        isPrimary: document.getElementById('contPrimary').value,
+        status: document.getElementById('contStatus').value
+    };
+
+    if(!contactObj.name) return Swal.fire("Uyarı", "Ad Soyad alanı boş bırakılamaz.", "warning");
+
+    showLoading();
+    try {
+        const res = await fetch(API_URL, { 
+            method: "POST", 
+            body: JSON.stringify({ 
+                action: "saveContact", 
+                contactData: contactObj, 
+                currentUser: currentUser 
+            }) 
+        }).then(r => r.json());
+
+        hideLoading();
+        if(res.status === 'success') {
+            const modalEl = document.getElementById('contactModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if(modalInstance) modalInstance.hide();
+            
+            fetchDetailContacts(custId);
+            Swal.fire({ icon: 'success', title: 'Başarılı', text: res.message, timer: 1500, showConfirmButton: false });
+        } else {
+            Swal.fire("Hata", res.message, "error");
+        }
+    } catch (e) {
+        hideLoading();
+        Swal.fire("Hata", "Sunucuya bağlanılamadı.", "error");
+    }
+}
+
+async function deleteContactFunc(id, customerId) {
+    const r = await Swal.fire({ 
+        title: 'Emin misiniz?', 
+        text: "Kişi kaydı silinecektir!", 
+        icon: 'warning', 
+        showCancelButton: true, 
+        confirmButtonText: 'Evet, Sil',
+        cancelButtonText: 'Vazgeç'
+    });
+
+    if (r.isConfirmed) {
+        showLoading();
+        try {
+            await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "deleteContact", contactId: id }) });
+            hideLoading();
+            fetchDetailContacts(customerId);
+        } catch (e) {
+            hideLoading();
+            Swal.fire('Hata!', 'İşlem başarısız.', 'error');
+        }
+    }
+}
