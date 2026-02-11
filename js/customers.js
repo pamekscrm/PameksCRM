@@ -1,41 +1,53 @@
 /**
- * MÜŞTERİ YÖNETİMİ SCRIPTLERİ
- * customers.js
+ * MÜŞTERİ YÖNETİMİ - MODERN & MOBİL UYUMLU
  */
 
-// Müşteri Listesini Getir ve Tabloya Bas
+// YÜKLEME EKRANI KONTROLLERİ
+function showLoading() {
+    document.getElementById('loadingOverlay').style.display = 'flex';
+}
+
+function hideLoading() {
+    document.getElementById('loadingOverlay').style.display = 'none';
+}
+
+// Müşteri Listesini Yükle
 function loadCustomersModule() {
     const contentDiv = document.getElementById('dynamicContent');
     const titleDiv = document.getElementById('pageTitle');
     
     titleDiv.innerText = "Müşteri Listesi";
+    
+    // Mobil uyumlu kart tasarımı ve tablo
     contentDiv.innerHTML = `
-        <div class="content-card">
-            <div class="d-flex justify-content-between mb-3">
-                <input type="text" id="customerSearch" class="form-control w-25" placeholder="Firma Ara...">
-                <button class="btn btn-primary" onclick="openCustomerDetail('new')">
-                    <i class="fas fa-plus"></i> Yeni Müşteri
-                </button>
+        <div class="content-card bg-white p-3 rounded shadow-sm">
+            <div class="row g-2 mb-3 align-items-center">
+                <div class="col-12 col-md-6">
+                    <input type="text" id="customerSearch" class="form-control" placeholder="🔍 Firma Ara...">
+                </div>
+                <div class="col-12 col-md-6 text-md-end">
+                    <button class="btn btn-primary w-100 w-md-auto" onclick="openCustomerDetail('new')">
+                        <i class="fas fa-plus"></i> Yeni Müşteri
+                    </button>
+                </div>
             </div>
+            
             <div class="table-responsive">
-                <table class="table table-hover align-middle table-striped" id="customerTable">
+                <table class="table table-hover align-middle" id="customerTable" style="min-width: 800px;">
                     <thead class="table-light">
                         <tr>
                             <th>Firma Adı</th>
                             <th>Tip</th>
-                            <th>Ülke</th>
                             <th>Şehir</th>
                             <th>Telefon</th>
-                            <th>E-posta</th>
                             <th>Durum</th>
-                            <th>İşlemler</th>
+                            <th class="text-end">İşlemler</th>
                         </tr>
                     </thead>
                     <tbody id="customerTableBody">
                         <tr>
-                            <td colspan="8" class="text-center py-5 text-muted">
-                                <div class="spinner-border text-primary" role="status"></div>
-                                <div class="mt-2">Veriler Yükleniyor...</div>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                Veriler Yükleniyor...
                             </td>
                         </tr>
                     </tbody>
@@ -47,13 +59,16 @@ function loadCustomersModule() {
 }
 
 function fetchCustomers() {
+    // Spinner göstermiyoruz çünkü sayfa içi yükleme, kullanıcıyı kilitlemesin
+    const tbody = document.getElementById('customerTableBody');
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4"><div class="spinner-border text-primary"></div></td></tr>`;
+
     fetch(API_URL, {
         method: "POST",
         body: new URLSearchParams({ action: "getCustomers" })
     })
     .then(r => r.json())
     .then(response => {
-        const tbody = document.getElementById('customerTableBody');
         tbody.innerHTML = ""; 
 
         if (response.status === "success" && response.data.length > 0) {
@@ -65,19 +80,20 @@ function fetchCustomers() {
 
                 const row = `
                     <tr>
-                        <td class="fw-bold text-primary">${cust.name}</td>
-                        <td>${cust.type || '-'}</td>
-                        <td>${cust.country || '-'}</td>
+                        <td>
+                            <div class="fw-bold text-primary">${cust.name}</div>
+                            <small class="text-muted d-block d-md-none">${cust.city || ''}</small>
+                        </td>
+                        <td><span class="badge bg-light text-dark border">${cust.type || '-'}</span></td>
                         <td>${cust.city || '-'}</td>
                         <td>${cust.phone || '-'}</td>
-                        <td><small>${cust.email || '-'}</small></td>
                         <td><span class="badge bg-${badgeColor}">${cust.status}</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-dark" onclick="openCustomerDetail('${cust.id}')">
-                                <i class="fas fa-edit"></i>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-light border" onclick="openCustomerDetail('${cust.id}')">
+                                <i class="fas fa-edit text-primary"></i>
                             </button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteCustomerFunc('${cust.id}')">
-                                <i class="fas fa-trash"></i>
+                            <button class="btn btn-sm btn-light border" onclick="deleteCustomerFunc('${cust.id}')">
+                                <i class="fas fa-trash text-danger"></i>
                             </button>
                         </td>
                     </tr>
@@ -85,11 +101,11 @@ function fetchCustomers() {
                 tbody.innerHTML += row;
             });
         } else {
-            tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">Kayıtlı müşteri bulunamadı.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted p-4">Hiç kayıt bulunamadı.</td></tr>`;
         }
     })
     .catch(err => {
-        document.getElementById('customerTableBody').innerHTML = `<tr><td colspan="8" class="text-center text-danger">Hata: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Bağlantı Hatası!</td></tr>`;
     });
 }
 
@@ -103,6 +119,7 @@ function openCustomerDetail(id) {
         modal.show();
     } else {
         document.getElementById('modalTitle').innerText = "Müşteri Düzenle";
+        showLoading(); // Detay çekerken kilitle
         
         fetch(API_URL, {
             method: "POST",
@@ -110,11 +127,16 @@ function openCustomerDetail(id) {
         })
         .then(r => r.json())
         .then(res => {
+            hideLoading();
             if(res.status === 'success') {
                 const d = res.data;
                 document.getElementById('custId').value = d.id;
                 document.getElementById('custName').value = d.name;
+                
+                // Dinamik Select Değerlerini Kontrol Et (Listede yoksa ekle)
+                ensureOptionExists('custType', d.type);
                 document.getElementById('custType').value = d.type;
+
                 document.getElementById('custStatus').value = d.status;
                 document.getElementById('custCountry').value = d.country;
                 document.getElementById('custCity').value = d.city;
@@ -122,26 +144,38 @@ function openCustomerDetail(id) {
                 document.getElementById('custEmail').value = d.email;
                 document.getElementById('custWeb').value = d.website;
                 document.getElementById('custAddress').value = d.address;
+
+                ensureOptionExists('custPayment', d.payment);
                 document.getElementById('custPayment').value = d.payment;
+
+                ensureOptionExists('custShipping', d.shipping);
                 document.getElementById('custShipping').value = d.shipping;
+
                 document.getElementById('custNotes').value = d.notes;
                 modal.show();
+            } else {
+                Swal.fire('Hata', 'Müşteri verisi alınamadı', 'error');
             }
         });
     }
 }
 
 function saveCustomerData() {
-    const btn = document.querySelector('.modal-footer .btn-primary');
-    btn.disabled = true;
-    btn.innerText = "Kaydediliyor...";
+    // Form Doğrulama (Basit)
+    const name = document.getElementById('custName').value;
+    if(!name) {
+        Swal.fire('Eksik Bilgi', 'Lütfen Firma Adını giriniz.', 'warning');
+        return;
+    }
+
+    showLoading(); // İşlem Başladı - Spinner Aç
 
     const currentUser = JSON.parse(sessionStorage.getItem('crmUser'));
 
     const payload = {
         action: "saveCustomer",
         id: document.getElementById('custId').value,
-        name: document.getElementById('custName').value,
+        name: name,
         type: document.getElementById('custType').value,
         status: document.getElementById('custStatus').value,
         country: document.getElementById('custCountry').value,
@@ -162,31 +196,134 @@ function saveCustomerData() {
     })
     .then(r => r.json())
     .then(res => {
-        alert(res.message);
-        btn.disabled = false;
-        btn.innerText = "Kaydet";
-        
-        const modalEl = document.getElementById('customerDetailModal');
-        const modal = bootstrap.Modal.getInstance(modalEl);
-        modal.hide();
-        loadCustomersModule(); // Listeyi yenile
+        hideLoading(); // İşlem Bitti - Spinner Kapat
+
+        if(res.status === 'success') {
+            Swal.fire({
+                title: 'Başarılı!',
+                text: res.message,
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            
+            const modalEl = document.getElementById('customerDetailModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            modal.hide();
+            fetchCustomers(); // Listeyi sessizce yenile
+        } else {
+            Swal.fire('Hata', res.message, 'error');
+        }
+    })
+    .catch(err => {
+        hideLoading();
+        Swal.fire('Bağlantı Hatası', 'Sunucuya ulaşılamadı.', 'error');
     });
 }
 
 function deleteCustomerFunc(id) {
-    if(confirm("Bu müşteri kaydını silmek istediğinize emin misiniz?")) {
-        fetch(API_URL, {
-            method: "POST",
-            body: new URLSearchParams({ action: "deleteCustomer", id: id })
-        })
-        .then(r => r.json())
-        .then(res => {
-            if (res.status === 'error') {
-                alert("HATA: " + res.message);
-            } else {
-                alert(res.message);
-                loadCustomersModule();
+    Swal.fire({
+        title: 'Emin misiniz?',
+        text: "Bu müşteri kaydı silinecek! Bu işlem geri alınamaz.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Evet, Sil!',
+        cancelButtonText: 'Vazgeç'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            showLoading(); // Spinner Aç
+
+            fetch(API_URL, {
+                method: "POST",
+                body: new URLSearchParams({ action: "deleteCustomer", id: id })
+            })
+            .then(r => r.json())
+            .then(res => {
+                hideLoading(); // Spinner Kapat
+
+                if (res.status === 'success') {
+                    Swal.fire('Silindi!', res.message, 'success');
+                    fetchCustomers();
+                } else {
+                    Swal.fire('Silinemedi!', res.message, 'error');
+                }
+            })
+            .catch(err => {
+                hideLoading();
+                Swal.fire('Hata', 'Bağlantı hatası oluştu.', 'error');
+            });
+        }
+    });
+}
+
+// --- DİNAMİK DROPDOWN YÖNETİMİ ---
+
+// Yeni Seçenek Ekleme Fonksiyonu (SweetAlert ile)
+function addNewOption(selectId, title) {
+    Swal.fire({
+        title: title,
+        input: 'text',
+        inputPlaceholder: 'Yeni değer yazın...',
+        showCancelButton: true,
+        confirmButtonText: 'Ekle',
+        cancelButtonText: 'İptal',
+        inputValidator: (value) => {
+            if (!value) {
+                return 'Bir değer yazmalısınız!';
             }
-        });
+        }
+    }).then((result) => {
+        if (result.isConfirmed && result.value) {
+            const select = document.getElementById(selectId);
+            const newValue = result.value;
+
+            // Zaten var mı kontrol et
+            let exists = false;
+            for(let i=0; i<select.options.length; i++) {
+                if(select.options[i].value === newValue) {
+                    exists = true;
+                    break;
+                }
+            }
+
+            if(!exists) {
+                const opt = document.createElement('option');
+                opt.value = newValue;
+                opt.innerHTML = newValue;
+                select.appendChild(opt);
+            }
+            
+            // Yeni değeri seç
+            select.value = newValue;
+            
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000
+            });
+            Toast.fire({ icon: 'success', title: 'Listeye eklendi' });
+        }
+    });
+}
+
+// Eğer backend'den listede olmayan bir değer gelirse onu listeye ekle
+function ensureOptionExists(selectId, value) {
+    if(!value) return;
+    const select = document.getElementById(selectId);
+    let exists = false;
+    for (let i = 0; i < select.options.length; i++) {
+        if (select.options[i].value === value) {
+            exists = true;
+            break;
+        }
+    }
+    if (!exists) {
+        const opt = document.createElement('option');
+        opt.value = value;
+        opt.innerText = value;
+        select.appendChild(opt);
     }
 }
