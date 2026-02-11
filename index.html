@@ -79,17 +79,15 @@
         </form>
         
         <div class="mt-4 text-muted small">
-            &copy; 2024 Pameks Giyim
+            &copy; 2026 Pameks Giyim
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        // API URL (Senin URL'in)
         const API_URL = "https://script.google.com/macros/s/AKfycby6vg7szzK1m5UTCeLC2s8J82dSShpj5HiVmGDu40KKqxlmZShGAoRCoa9j5TbTJeV2Lw/exec";
 
-        // Yükleniyor Göster/Gizle
         function showLoading() { document.getElementById('loadingOverlay').style.display = 'flex'; }
         function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
 
@@ -99,7 +97,6 @@
             const u = document.getElementById('username').value.trim();
             const p = document.getElementById('password').value.trim();
 
-            // Giriş Başladı - Ekranı Kilitle
             showLoading();
 
             const payload = {
@@ -114,10 +111,9 @@
             })
             .then(r => r.json())
             .then(data => {
-                hideLoading(); // İşlem bitti - Ekranı aç
+                hideLoading();
 
                 if (data.status === "success") {
-                    // Modern Başarı Mesajı
                     Swal.fire({
                         icon: 'success',
                         title: 'Giriş Başarılı!',
@@ -125,14 +121,12 @@
                         timer: 1500,
                         showConfirmButton: false
                     }).then(() => {
-                        // Token Kaydet ve Yönlendir
                         sessionStorage.setItem('crmToken', data.token);
                         sessionStorage.setItem('crmUser', JSON.stringify(data.user));
                         window.location.href = 'dashboard.html';
                     });
 
                 } else {
-                    // Modern Hata Mesajı
                     Swal.fire({
                         icon: 'error',
                         title: 'Giriş Başarısız',
@@ -143,7 +137,6 @@
             })
             .catch(error => {
                 hideLoading();
-                console.error(error);
                 Swal.fire({
                     icon: 'warning',
                     title: 'Bağlantı Hatası',
