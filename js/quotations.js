@@ -1,5 +1,5 @@
 /**
- * js/quotations.js - TEKLİF VE PAZARLIK YÖNETİMİ MANTIĞI
+ * js/quotations.js - ÜÇLÜ FİYAT & PAZARLIK SİSTEMİ (GÜNCEL)
  */
 
 /**
@@ -22,20 +22,25 @@ function openQuotationModal(mode) {
  * Mevcut teklifi pazarlık/düzenleme için modala yükler
  */
 function editQuotation(q) {
-    document.getElementById('quoteId').value = q.id;
-    document.getElementById('quoteNo').value = q.quoteNo;
+    // HTML Elementlerini Backend'den gelen verilerle doldurur
+    document.getElementById('quoteId').value = q.id || "";
+    document.getElementById('quoteNo').value = q.quoteNo || "";
     document.getElementById('quoteModelCode').value = q.modelCode || "";
     document.getElementById('quoteFabric').value = q.fabric || "";
-    document.getElementById('quoteQuantity').value = q.quantity || 0;
-    document.getElementById('quoteUnitPrice').value = q.unitPrice || 0;
+    
+    // Üçlü Fiyat Sistemi Eşleşmesi
+    document.getElementById('quoteTargetPrice').value = q.targetPrice || 0;
+    document.getElementById('quoteOfferedPrice').value = q.offeredPrice || 0;
+    document.getElementById('quoteAgreedPrice').value = q.agreedPrice || 0;
+    
     document.getElementById('quoteCurrency').value = q.currency || "EUR";
     document.getElementById('quoteResult').value = q.result || "Açık";
     document.getElementById('quoteDesc').value = q.description || "";
 
-    // Tarih formatlarını düzelt (yyyy-mm-dd formatına çevir)
-    if(q.date) document.getElementById('quoteDate').value = new Date(q.date).toISOString().split('T')[0];
-    if(q.validUntil) document.getElementById('quoteValidUntil').value = new Date(q.validUntil).toISOString().split('T')[0];
-    if(q.leadTime) document.getElementById('quoteLeadTime').value = new Date(q.leadTime).toISOString().split('T')[0];
+    // Tarih formatlarını düzelt (yyyy-mm-dd)
+    if(q.date) document.getElementById('quoteDate').value = formatDateForInput(q.date);
+    if(q.validUntil) document.getElementById('quoteValidUntil').value = formatDateForInput(q.validUntil);
+    if(q.leadTime) document.getElementById('quoteLeadTime').value = formatDateForInput(q.leadTime);
 
     document.getElementById('quoteModalTitle').innerText = "Teklif Düzenle / Pazarlık";
     const modal = new bootstrap.Modal(document.getElementById('quotationModal'));
@@ -43,18 +48,21 @@ function editQuotation(q) {
 }
 
 /**
- * Teklif verilerini sunucuya kaydeder (Pazarlık logu backend'de tutulur)
+ * Teklif verilerini sunucuya kaydeder
  */
 async function saveQuotationData() {
     const custId = document.getElementById('dashboardCustId').value;
+    
+    // Form verilerini backend'in beklediği formatta toplar
     const quotationObj = {
         id: document.getElementById('quoteId').value,
         customerId: custId,
         quoteNo: document.getElementById('quoteNo').value.trim(),
         modelCode: document.getElementById('quoteModelCode').value.trim(),
         fabric: document.getElementById('quoteFabric').value.trim(),
-        quantity: document.getElementById('quoteQuantity').value,
-        unitPrice: document.getElementById('quoteUnitPrice').value,
+        targetPrice: document.getElementById('quoteTargetPrice').value,  // Talep
+        offeredPrice: document.getElementById('quoteOfferedPrice').value, // Teklif
+        agreedPrice: document.getElementById('quoteAgreedPrice').value,   // Onay
         currency: document.getElementById('quoteCurrency').value,
         date: document.getElementById('quoteDate').value,
         validUntil: document.getElementById('quoteValidUntil').value,
@@ -63,8 +71,9 @@ async function saveQuotationData() {
         description: document.getElementById('quoteDesc').value.trim()
     };
 
-    if(!quotationObj.quoteNo || !quotationObj.unitPrice) {
-        return Swal.fire("Uyarı", "Teklif No ve Birim Fiyat alanları zorunludur.", "warning");
+    // Temel Doğrulama
+    if(!quotationObj.quoteNo) {
+        return Swal.fire("Uyarı", "Teklif No alanı zorunludur.", "warning");
     }
 
     showLoading();
@@ -74,7 +83,7 @@ async function saveQuotationData() {
             body: JSON.stringify({
                 action: "saveQuotation",
                 quotationData: quotationObj,
-                currentUser: currentUser
+                currentUser: currentUser.name // Sadece isim gönderilir
             })
         }).then(r => r.json());
 
@@ -126,4 +135,13 @@ async function deleteQuotationFunc(id, customerId) {
             Swal.fire('Hata!', 'İşlem başarısız.', 'error');
         }
     }
+}
+
+/**
+ * Tarih objesini inputun anlayacağı yyyy-mm-dd formatına çevirir
+ */
+function formatDateForInput(dateStr) {
+    if(!dateStr) return "";
+    const d = new Date(dateStr);
+    return d.toISOString().split('T')[0];
 }
