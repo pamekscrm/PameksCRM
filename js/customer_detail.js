@@ -1,5 +1,5 @@
 /**
- * js/customer_detail.js - MODERN DASHBOARD GÖRÜNÜMÜ & HATA DÜZELTİMLERİ
+ * js/customer_detail.js - MODERN DASHBOARD & BİRİNCİL SÜTUNU DÜZELTİLMİŞ SÜRÜM
  */
 
 async function showCustomerDashboard(id) {
@@ -33,19 +33,20 @@ async function showCustomerDashboard(id) {
             <div class="row g-4">
                 <div class="col-md-6">
                     <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-white fw-bold"><i class="fas fa-info-circle text-primary me-2"></i> Genel Bilgiler</div>
+                        <div class="card-header bg-white fw-bold py-3"><i class="fas fa-info-circle text-primary me-2"></i> Genel Bilgiler</div>
                         <div class="card-body">
-                            <div class="d-flex justify-content-between border-bottom py-2"><span>Sektör/Tip:</span> <span class="fw-bold">${d.type || '-'}</span></div>
-                            <div class="d-flex justify-content-between border-bottom py-2"><span>Ödeme Şekli:</span> <span class="fw-bold text-muted small">${d.payment || '-'}</span></div>
+                            <div class="d-flex justify-content-between border-bottom py-2"><span>Sektör/Tip:</span> <span class="fw-bold text-dark">${d.type || '-'}</span></div>
+                            <div class="d-flex justify-content-between border-bottom py-2"><span>Ödeme Şekli:</span> <span class="fw-bold text-muted">${d.payment || '-'}</span></div>
                             <div class="d-flex justify-content-between py-2"><span>Durum:</span> <span class="badge bg-success">${d.status}</span></div>
                         </div>
                     </div>
                 </div>
+
                 <div class="col-md-6">
                     <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-white fw-bold"><i class="fas fa-phone text-primary me-2"></i> İletişim Bilgileri</div>
+                        <div class="card-header bg-white fw-bold py-3"><i class="fas fa-address-book text-primary me-2"></i> İletişim Bilgileri</div>
                         <div class="card-body">
-                            <div class="d-flex justify-content-between border-bottom py-2"><span>Telefon:</span> <span class="fw-bold">${d.phone || '-'}</span></div>
+                            <div class="d-flex justify-content-between border-bottom py-2"><span>Telefon:</span> <span class="fw-bold text-dark">${d.phone || '-'}</span></div>
                             <div class="d-flex justify-content-between border-bottom py-2"><span>E-Posta:</span> <span class="fw-bold text-muted small">${d.email || '-'}</span></div>
                             <div class="d-flex justify-content-between py-2"><span>Şehir/Ülke:</span> <span class="fw-bold">${d.city || '-'}/${d.country || '-'}</span></div>
                         </div>
@@ -55,32 +56,40 @@ async function showCustomerDashboard(id) {
                 <div class="col-12 mt-4">
                     <div class="card border-0 shadow-sm">
                         <div class="card-header bg-white p-0">
-                            <ul class="nav nav-tabs border-bottom-0" id="detailTabs">
-                                <li class="nav-item"><button class="nav-link active py-3 px-4 fw-bold" data-bs-toggle="tab" data-bs-target="#tab-contacts" onclick="fetchDetailContacts('${d.id}')">İlgili Kişiler</button></li>
-                                <li class="nav-item"><button class="nav-link py-3 px-4 fw-bold" data-bs-toggle="tab" data-bs-target="#tab-tasks">Görevler</button></li>
+                            <ul class="nav nav-tabs border-bottom-0" id="detailTabs" role="tablist">
+                                <li class="nav-item"><button class="nav-link active py-3 px-4 fw-bold" id="contacts-tab-btn" data-bs-toggle="tab" data-bs-target="#tab-contacts" onclick="fetchDetailContacts('${d.id}')">İlgili Kişiler</button></li>
+                                <li class="nav-item"><button class="nav-link py-3 px-4 fw-bold" id="tasks-tab-btn" data-bs-toggle="tab" data-bs-target="#tab-tasks">Görevler</button></li>
                             </ul>
                         </div>
                         <div class="card-body p-4 tab-content">
                             <div class="tab-pane fade show active" id="tab-contacts">
                                 <div class="d-flex justify-content-between mb-3 align-items-center">
-                                    <h6 class="m-0 fw-bold">Kayıtlı İnsanlar</h6>
-                                    <button class="btn btn-sm btn-primary" onclick="openContactModal('new')"><i class="fas fa-user-plus"></i> Yeni Kişi</button>
+                                    <h6 class="m-0 fw-bold text-dark">Kayıtlı İnsanlar</h6>
+                                    <button class="btn btn-sm btn-primary" onclick="openContactModal('new')"><i class="fas fa-user-plus me-1"></i> Yeni Kişi</button>
                                 </div>
                                 <div class="table-responsive">
                                     <table class="table table-sm table-hover align-middle">
-                                        <thead class="table-light">
-                                            <tr><th>Ad Soyad</th><th>Departman</th><th>Ünvan</th><th>İletişim</th><th class="text-center">Birincil</th><th class="text-end">İşlem</th></tr>
+                                        <thead class="table-light small text-uppercase fw-bold">
+                                            <tr>
+                                                <th>Ad Soyad</th>
+                                                <th>Departman</th>
+                                                <th>Ünvan</th>
+                                                <th>İletişim</th>
+                                                <th class="text-center">Birincil</th>
+                                                <th class="text-end">İşlem</th>
+                                            </tr>
                                         </thead>
                                         <tbody id="detailContactBody"></tbody>
                                     </table>
                                 </div>
                             </div>
-                            <div class="tab-pane fade text-center py-5" id="tab-tasks">İşlem kayıtları buraya gelecek.</div>
+                            <div class="tab-pane fade text-center py-5 text-muted" id="tab-tasks">İşlem kayıtları buraya gelecek.</div>
                         </div>
                     </div>
                 </div>
             </div>
-            <input type="hidden" id="dashboardCustId" value="${d.id}">`; // Müşteri ID'sini saklamak için kritik
+            <input type="hidden" id="dashboardCustId" value="${d.id}">`;
+        
         fetchDetailContacts(d.id);
     } catch (e) { console.error(e); } finally { hideLoading(); }
 }
@@ -88,30 +97,42 @@ async function showCustomerDashboard(id) {
 async function fetchDetailContacts(customerId) {
     const b = document.getElementById('detailContactBody');
     if(!b) return;
-    b.innerHTML = '<tr><td colspan="6" class="text-center py-3">Yükleniyor...</td></tr>';
-    const res = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "getContacts", customerId: customerId }) }).then(r => r.json());
+    b.innerHTML = '<tr><td colspan="6" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>';
+    
+    const res = await fetch(API_URL, { 
+        method: "POST", 
+        body: JSON.stringify({ action: "getContacts", customerId: customerId }) 
+    }).then(r => r.json());
+
     b.innerHTML = "";
     if(res.status === "success" && res.data.length > 0) {
         res.data.forEach(c => {
+            // Birincil sütunu görsel belirteç: Evet ise yıldız, Hayır ise tire
+            let primaryTag = c.isPrimary === 'Evet' ? '<span class="badge bg-warning text-dark"><i class="fas fa-star me-1"></i>Birincil</span>' : '<span class="text-muted">-</span>';
+            
             b.innerHTML += `<tr>
                 <td><strong>${c.name}</strong></td>
                 <td>${c.department || '-'}</td>
                 <td>${c.title || '-'}</td>
-                <td><small>${c.phone || ''}<br>${c.email || ''}</small></td>
-                <td class="text-center">${c.isPrimary === 'Evet' ? '⭐' : '-'}</td>
+                <td><small><i class="fas fa-phone me-1 text-muted"></i>${c.phone || ''}<br><i class="fas fa-envelope me-1 text-muted"></i>${c.email || ''}</small></td>
+                <td class="text-center">${primaryTag}</td>
                 <td class="text-end">
-                    <button class="btn btn-sm btn-link me-1" onclick='editContact(${JSON.stringify(c)})'><i class="fas fa-pencil-alt text-primary"></i></button>
-                    <button class="btn btn-sm btn-link text-danger" onclick="deleteContactFunc('${c.id}', '${c.customerId}')"><i class="fas fa-trash text-danger"></i></button>
+                    <button class="btn btn-sm btn-link text-primary me-2 p-0" title="Düzenle" onclick='editContact(${JSON.stringify(c)})'><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-link text-danger p-0" title="Sil" onclick="deleteContactFunc('${c.id}', '${c.customerId}')"><i class="fas fa-trash"></i></button>
                 </td>
             </tr>`;
         });
-    } else { b.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">Kayıt yok.</td></tr>'; }
+    } else { 
+        b.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Kayıtlı ilgili kişi bulunamadı.</td></tr>'; 
+    }
 }
 
 function openContactModal(mode) { 
     document.getElementById('contactForm').reset(); 
     document.getElementById('contId').value = ""; 
-    new bootstrap.Modal(document.getElementById('contactModal')).show(); 
+    const modalEl = document.getElementById('contactModal');
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show(); 
 }
 
 function editContact(c) {
@@ -123,45 +144,87 @@ function editContact(c) {
     document.getElementById('contEmail').value = c.email || "";
     document.getElementById('contPrimary').value = c.isPrimary || "Hayır";
     document.getElementById('contStatus').value = c.status || "Aktif";
-    new bootstrap.Modal(document.getElementById('contactModal')).show();
+    
+    const modalEl = document.getElementById('contactModal');
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
 }
 
 async function saveContactData() {
     const custId = document.getElementById('dashboardCustId').value;
-    const p = { 
-        action: "saveContact", 
-        currentUser: currentUser.name, 
-        contactData: { 
-            id: document.getElementById('contId').value, 
-            customerId: custId, 
-            name: document.getElementById('contName').value, 
-            department: document.getElementById('contDept').value, // Artık HTML'de var, hata vermez
-            title: document.getElementById('contTitle').value, 
-            phone: document.getElementById('contPhone').value, 
-            email: document.getElementById('contEmail').value, 
-            isPrimary: document.getElementById('contPrimary').value, 
-            status: document.getElementById('contStatus').value 
-        } 
+    
+    // Veri toplama ve doğrulama
+    const contactObj = {
+        id: document.getElementById('contId').value,
+        customerId: custId,
+        name: document.getElementById('contName').value.trim(),
+        department: document.getElementById('contDept').value.trim(),
+        title: document.getElementById('contTitle').value.trim(),
+        phone: document.getElementById('contPhone').value.trim(),
+        email: document.getElementById('contEmail').value.trim(),
+        isPrimary: document.getElementById('contPrimary').value,
+        status: document.getElementById('contStatus').value
     };
 
-    if(!p.contactData.name) return Swal.fire("Hata", "Ad Soyad alanı zorunludur.", "warning");
+    if(!contactObj.name) {
+        return Swal.fire("Uyarı", "Ad Soyad alanı boş bırakılamaz.", "warning");
+    }
 
     showLoading();
-    const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(p) }).then(r => r.json());
-    hideLoading();
-    if(res.status === 'success') {
-        bootstrap.Modal.getInstance(document.getElementById('contactModal')).hide();
-        fetchDetailContacts(custId);
-        Swal.fire({ icon: 'success', title: 'Başarılı', text: res.message, timer: 1500, showConfirmButton: false });
+    try {
+        const res = await fetch(API_URL, { 
+            method: "POST", 
+            body: JSON.stringify({ 
+                action: "saveContact", 
+                contactData: contactObj, 
+                currentUser: currentUser // Nesne olarak gönderiyoruz, Main.gs içindeki düzeltmen ile isme dönüşecek
+            }) 
+        }).then(r => r.json());
+
+        hideLoading();
+        if(res.status === 'success') {
+            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('contactModal'));
+            if(modalInstance) modalInstance.hide();
+            
+            fetchDetailContacts(custId);
+            Swal.fire({ icon: 'success', title: 'Başarılı', text: res.message, timer: 1500, showConfirmButton: false });
+        } else {
+            Swal.fire("Hata", res.message, "error");
+        }
+    } catch (e) {
+        hideLoading();
+        Swal.fire("Hata", "Sunucuya bağlanılamadı.", "error");
     }
 }
 
 async function deleteContactFunc(id, customerId) {
-    const r = await Swal.fire({ title: 'Silinsin mi?', text: "Bu kişi kaydı silinecektir!", icon: 'warning', showCancelButton: true, confirmButtonText: 'Evet, Sil' });
+    const r = await Swal.fire({ 
+        title: 'Emin misiniz?', 
+        text: "Bu kişi kaydı kalıcı olarak silinecektir!", 
+        icon: 'warning', 
+        showCancelButton: true, 
+        confirmButtonText: 'Evet, Sil',
+        cancelButtonText: 'Vazgeç'
+    });
+
     if (r.isConfirmed) {
         showLoading();
-        await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "deleteContact", contactId: id }) });
-        hideLoading();
-        fetchDetailContacts(customerId);
+        try {
+            const res = await fetch(API_URL, { 
+                method: "POST", 
+                body: JSON.stringify({ action: "deleteContact", contactId: id }) 
+            }).then(r => r.json());
+            
+            hideLoading();
+            if(res.status === 'success') {
+                fetchDetailContacts(customerId);
+                Swal.fire('Silindi!', res.message, 'success');
+            } else {
+                Swal.fire('Hata!', res.message, 'error');
+            }
+        } catch (e) {
+            hideLoading();
+            Swal.fire('Hata!', 'Bağlantı sorunu oluştu.', 'error');
+        }
     }
 }
