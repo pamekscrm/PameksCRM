@@ -1,17 +1,25 @@
 /**
- * js/customers.js - TAM SÜRÜM (HİÇBİR ÖZELLİK EKSİLTİLMEDİ)
+ * js/customers.js - HATA KORUMALI & TAM SÜRÜM
  */
 let globalSettings = { Musteri_Tipleri: [], Odeme_Sekilleri: [], Nakliye_Tipleri: [] };
 
 function showLoading() { document.getElementById('loadingOverlay').style.display = 'flex'; }
 function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
 
+// Element değerini güvenli bir şekilde atayan yardımcı fonksiyon
+const setVal = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val || "";
+};
+
 async function fetchSettings() {
-    const res = await fetch(API_URL, { 
-        method: "POST", 
-        body: JSON.stringify({ action: "getSettings" }) 
-    }).then(r => r.json());
-    if(res.status === 'success') globalSettings = res.data;
+    try {
+        const res = await fetch(API_URL, { 
+            method: "POST", 
+            body: JSON.stringify({ action: "getSettings" }) 
+        }).then(r => r.json());
+        if(res.status === 'success') globalSettings = res.data;
+    } catch (e) { console.error("Ayarlar yüklenemedi:", e); }
 }
 
 function populateSelect(selectId, items, selectedValue = "") {
@@ -40,7 +48,7 @@ async function loadCustomersModule() {
                 </div>
                 <div class="col-12 col-md-6 text-md-end">
                     <button class="btn btn-primary w-100 w-md-auto" onclick="openCustomerDetail('new')">
-                        <i class="fas fa-plus"></i> Yeni Müşteri
+                        <i class="fas fa-plus text-white me-1"></i> Yeni Müşteri
                     </button>
                 </div>
             </div>
@@ -65,6 +73,7 @@ async function loadCustomersModule() {
 
 async function fetchCustomers() {
     const tbody = document.getElementById('customerTableBody');
+    if(!tbody) return;
     tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4"><div class="spinner-border text-primary"></div></td></tr>`;
 
     try {
@@ -99,10 +108,11 @@ async function fetchCustomers() {
     }
 }
 
-// Orijinal Kodundaki Filtreleme Fonksiyonu
 function filterCustomers() {
     const input = document.getElementById("customerSearch").value.toUpperCase();
-    const tr = document.getElementById("customerTableBody").getElementsByTagName("tr");
+    const tableBody = document.getElementById("customerTableBody");
+    if(!tableBody) return;
+    const tr = tableBody.getElementsByTagName("tr");
     for (let i = 0; i < tr.length; i++) {
         let td = tr[i].getElementsByTagName("td")[0];
         if (td) {
@@ -113,74 +123,109 @@ function filterCustomers() {
 }
 
 async function openCustomerDetail(id) {
-    const modal = new bootstrap.Modal(document.getElementById('customerDetailModal'));
-    document.getElementById('customerForm').reset();
-    populateSelect('custType', globalSettings.Musteri_Tipleri);
-    populateSelect('custPayment', globalSettings.Odeme_Sekilleri);
-    populateSelect('custShipping', globalSettings.Nakliye_Tipleri);
+    showLoading();
+    try {
+        // Ayarlar yoksa çek
+        if(globalSettings.Musteri_Tipleri.length === 0) await fetchSettings();
 
-    if (id === 'new') {
-        document.getElementById('modalTitle').innerText = "Yeni Müşteri Ekle";
-        document.getElementById('custId').value = "";
-        modal.show();
-    } else {
-        document.getElementById('modalTitle').innerText = "Müşteri Düzenle";
-        showLoading();
-        const res = await fetch(API_URL, {
-            method: "POST",
-            body: JSON.stringify({ action: "getCustomerDetail", id: id })
-        }).then(r => r.json());
-        hideLoading();
-        if(res.status === 'success') {
-            const d = res.data;
-            document.getElementById('custId').value = d.id;
-            document.getElementById('custName').value = d.name;
-            document.getElementById('custStatus').value = d.status;
-            document.getElementById('custCountry').value = d.country;
-            document.getElementById('custCity').value = d.city;
-            document.getElementById('custPhone').value = d.phone;
-            document.getElementById('custEmail').value = d.email;
-            document.getElementById('custWeb').value = d.website;
-            document.getElementById('custAddress').value = d.address;
-            document.getElementById('custNotes').value = d.notes;
-            populateSelect('custType', globalSettings.Musteri_Tipleri, d.type);
-            populateSelect('custPayment', globalSettings.Odeme_Sekilleri, d.payment);
-            populateSelect('custShipping', globalSettings.Nakliye_Tipleri, d.shipping);
+        const modalDiv = document.getElementById('customerDetailModal');
+        const modal = new bootstrap.Modal(modalDiv);
+        
+        document.getElementById('customerForm').reset();
+        
+        // Selectleri doldur
+        populateSelect('custType', globalSettings.Musteri_Tipleri);
+        populateSelect('custPayment', globalSettings.Odeme_Sekilleri);
+        populateSelect('custShipping', globalSettings.Nakliye_Tipleri);
+
+        if (id === 'new') {
+            setVal('modalTitle', "Yeni Müşteri Ekle");
+            setVal('custId', "");
+            hideLoading();
             modal.show();
+        } else {
+            setVal('modalTitle', "Müşteri Düzenle");
+            const res = await fetch(API_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "getCustomerDetail", id: id })
+            }).then(r => r.json());
+            
+            if(res.status === 'success') {
+                const d = res.data;
+                
+                // Formu güvenli doldur (Eksik ID olsa bile çökmez)
+                setVal('custId', d.id);
+                setVal('custName', d.name);
+                setVal('custStatus', d.status);
+                setVal('custCountry', d.country);
+                setVal('custCity', d.city);
+                setVal('custPhone', d.phone);
+                setVal('custEmail', d.email);
+                setVal('custWeb', d.website);
+                setVal('custAddress', d.address);
+                setVal('custNotes', d.notes);
+                
+                populateSelect('custType', globalSettings.Musteri_Tipleri, d.type);
+                populateSelect('custPayment', globalSettings.Odeme_Sekilleri, d.payment);
+                populateSelect('custShipping', globalSettings.Nakliye_Tipleri, d.shipping);
+                
+                hideLoading();
+                modal.show();
+            } else {
+                hideLoading();
+                Swal.fire('Hata', 'Müşteri detayları alınamadı.', 'error');
+            }
         }
+    } catch (error) {
+        hideLoading();
+        console.error("Modal açma hatası:", error);
+        Swal.fire('Sistem Hatası', 'Beklenmedik bir hata oluştu.', 'error');
     }
 }
 
 async function saveCustomerData() {
-    const name = document.getElementById('custName').value;
-    if(!name) return Swal.fire('Hata', 'Firma Adı zorunludur.', 'warning');
+    const nameInput = document.getElementById('custName');
+    if(!nameInput || !nameInput.value) return Swal.fire('Hata', 'Firma Adı zorunludur.', 'warning');
+    
     showLoading();
     const payload = {
         action: "saveCustomer",
         id: document.getElementById('custId').value,
-        name: name,
+        name: nameInput.value,
         type: document.getElementById('custType').value,
         status: document.getElementById('custStatus').value,
-        country: document.getElementById('custCountry').value,
-        city: document.getElementById('custCity').value,
-        phone: document.getElementById('custPhone').value,
-        email: document.getElementById('custEmail').value,
-        website: document.getElementById('custWeb').value,
-        address: document.getElementById('custAddress').value,
-        payment: document.getElementById('custPayment').value,
-        shipping: document.getElementById('custShipping').value,
-        notes: document.getElementById('custNotes').value,
+        country: document.getElementById('custCountry') ? document.getElementById('custCountry').value : "",
+        city: document.getElementById('custCity') ? document.getElementById('custCity').value : "",
+        phone: document.getElementById('custPhone') ? document.getElementById('custPhone').value : "",
+        email: document.getElementById('custEmail') ? document.getElementById('custEmail').value : "",
+        website: document.getElementById('custWeb') ? document.getElementById('custWeb').value : "",
+        address: document.getElementById('custAddress') ? document.getElementById('custAddress').value : "",
+        payment: document.getElementById('custPayment') ? document.getElementById('custPayment').value : "",
+        shipping: document.getElementById('custShipping') ? document.getElementById('custShipping').value : "",
+        notes: document.getElementById('custNotes') ? document.getElementById('custNotes').value : "",
         user: currentUser.name
     };
-    const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) }).then(r => r.json());
-    hideLoading();
-    if(res.status === 'success') {
-        Swal.fire({ title: 'Başarılı', text: res.message, icon: 'success', timer: 2000, showConfirmButton: false });
-        bootstrap.Modal.getInstance(document.getElementById('customerDetailModal')).hide();
-        // Eğer dashboard üzerindeysek dashboard'u yenile, değilsek listeyi yenile
-        if(document.getElementById('customerDashboardHeader')) { showCustomerDashboard(payload.id); } else { fetchCustomers(); }
-    } else {
-        Swal.fire('Hata', res.message, 'error');
+
+    try {
+        const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) }).then(r => r.json());
+        hideLoading();
+        if(res.status === 'success') {
+            Swal.fire({ title: 'Başarılı', text: res.message, icon: 'success', timer: 1500, showConfirmButton: false });
+            const modalEl = document.getElementById('customerDetailModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if(modalInstance) modalInstance.hide();
+            
+            if(document.getElementById('customerDashboardHeader')) { 
+                showCustomerDashboard(payload.id); 
+            } else { 
+                fetchCustomers(); 
+            }
+        } else {
+            Swal.fire('Hata', res.message, 'error');
+        }
+    } catch (error) {
+        hideLoading();
+        Swal.fire('Hata', 'Sunucu bağlantı hatası.', 'error');
     }
 }
 
@@ -188,9 +233,14 @@ async function deleteCustomerFunc(id) {
     const result = await Swal.fire({ title: 'Emin misiniz?', text: "Müşteri silinecektir!", icon: 'warning', showCancelButton: true, confirmButtonText: 'Evet, Sil', cancelButtonText: 'İptal' });
     if (result.isConfirmed) {
         showLoading();
-        const res = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "deleteCustomer", id: id }) }).then(r => r.json());
-        hideLoading();
-        Swal.fire(res.status === 'success' ? 'Başarılı' : 'Hata', res.message, res.status);
-        if(res.status === 'success') fetchCustomers();
+        try {
+            const res = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "deleteCustomer", id: id }) }).then(r => r.json());
+            hideLoading();
+            Swal.fire(res.status === 'success' ? 'Başarılı' : 'Hata', res.message, res.status);
+            if(res.status === 'success') fetchCustomers();
+        } catch (error) {
+            hideLoading();
+            Swal.fire('Hata', 'Silme işlemi başarısız.', 'error');
+        }
     }
 }
