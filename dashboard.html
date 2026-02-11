@@ -79,6 +79,88 @@
         <div id="dynamicContent"></div>
     </main>
 
+    <div class="modal fade" id="customerDetailModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title" id="modalTitle">Müşteri Kartı</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="customerForm">
+                        <input type="hidden" id="custId">
+                        <div class="row g-3 mb-3">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small fw-bold">Firma Adı *</label>
+                                <input type="text" class="form-control" id="custName" required>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label class="form-label small fw-bold">Tip</label>
+                                <select class="form-select" id="custType"></select>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label class="form-label small fw-bold">Durum</label>
+                                <select class="form-select" id="custStatus">
+                                    <option value="Aktif">Aktif</option>
+                                    <option value="Pasif">Pasif</option>
+                                    <option value="Aday">Aday</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-12 col-md-4">
+                                <label class="form-label small fw-bold">Ülke</label>
+                                <input type="text" class="form-control" id="custCountry">
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <label class="form-label small fw-bold">Şehir</label>
+                                <input type="text" class="form-control" id="custCity">
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <label class="form-label small fw-bold">Telefon</label>
+                                <input type="tel" class="form-control" id="custPhone">
+                            </div>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small fw-bold">E-Posta</label>
+                                <input type="email" class="form-control" id="custEmail">
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small fw-bold">Web Sitesi</label>
+                                <input type="url" class="form-control" id="custWeb">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Adres</label>
+                            <textarea class="form-control" id="custAddress" rows="2"></textarea>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small fw-bold">Ödeme Şekli</label>
+                                <select class="form-select" id="custPayment"></select>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small fw-bold">Nakliye Tipi</label>
+                                <select class="form-select" id="custShipping"></select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Notlar</label>
+                            <textarea class="form-control" id="custNotes" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="button" class="btn btn-primary px-4" onclick="saveCustomerData()">
+                        <i class="fas fa-save"></i> Kaydet
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -90,27 +172,27 @@
                     <form id="userForm">
                         <input type="hidden" id="userId">
                         <div class="mb-3">
-                            <label class="form-label">Ad Soyad</label>
+                            <label class="form-label small fw-bold">Ad Soyad</label>
                             <input type="text" class="form-control" id="uName" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Kullanıcı Adı</label>
+                            <label class="form-label small fw-bold">Kullanıcı Adı</label>
                             <input type="text" class="form-control" id="uUsername" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Şifre (Değiştirmek istemiyorsanız boş bırakın)</label>
+                            <label class="form-label small fw-bold">Şifre</label>
                             <input type="password" class="form-control" id="uPassword">
                         </div>
                         <div class="row">
                             <div class="col-6 mb-3">
-                                <label class="form-label">Rol</label>
+                                <label class="form-label small fw-bold">Rol</label>
                                 <select class="form-select" id="uRole">
                                     <option value="personel">Personel</option>
                                     <option value="admin">Admin</option>
                                 </select>
                             </div>
                             <div class="col-6 mb-3">
-                                <label class="form-label">Durum</label>
+                                <label class="form-label small fw-bold">Durum</label>
                                 <select class="form-select" id="uStatus">
                                     <option value="Aktif">Aktif</option>
                                     <option value="Pasif">Pasif</option>
