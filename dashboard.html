@@ -270,38 +270,33 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content shadow border-0">
                 <div class="modal-header bg-light">
-                    <h6 class="modal-title fw-bold">Görev Planla</h6>
+                    <h6 class="modal-title fw-bold">Görev Detayı</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="taskForm">
                         <input type="hidden" id="taskId">
-                        <div class="mb-2">
-                            <label class="small fw-bold">Görev Tipi</label>
-                            <select id="taskType" class="form-select">
-                                <option value="Arama">Arama</option>
-                                <option value="Toplantı">Toplantı</option>
-                                <option value="E-Posta">E-Posta</option>
-                                <option value="Ziyaret">Müşteri Ziyareti</option>
-                            </select>
+                        <div class="mb-3">
+                            <label class="small fw-bold">Görev / Konu *</label>
+                            <input type="text" id="taskType" class="form-control" placeholder="Örn: Müşteri Ziyareti veya Toplantı">
                         </div>
-                        <div class="row g-2 mb-2">
+                        <div class="row g-2 mb-3">
                             <div class="col-6">
-                                <label class="small fw-bold">Başlangıç</label>
-                                <input type="date" id="taskStart" class="form-control">
+                                <label class="small fw-bold">Başlangıç Tarihi ve Saat</label>
+                                <input type="datetime-local" id="taskStart" class="form-control">
                             </div>
                             <div class="col-6">
-                                <label class="small fw-bold">Bitiş</label>
-                                <input type="date" id="taskEnd" class="form-control">
+                                <label class="small fw-bold">Bitiş Tarihi ve Saat</label>
+                                <input type="datetime-local" id="taskEnd" class="form-control">
                             </div>
                         </div>
-                        <div class="row g-2 mb-2">
+                        <div class="row g-2 mb-3">
                             <div class="col-6">
                                 <label class="small fw-bold">Öncelik</label>
                                 <select id="taskPriority" class="form-select">
-                                    <option value="Düşük">Düşük</option>
                                     <option value="Orta">Orta</option>
                                     <option value="Yüksek">Yüksek</option>
+                                    <option value="Düşük">Düşük</option>
                                 </select>
                             </div>
                             <div class="col-6">
@@ -314,18 +309,18 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="mb-2">
+                        <div class="mb-3">
                             <label class="small fw-bold">Sorumlu (Kullanıcı)</label>
                             <input type="text" id="taskAssigned" class="form-control" placeholder="Atanan kişi">
                         </div>
                         <div class="mb-0">
                             <label class="small fw-bold">Açıklama</label>
-                            <textarea id="taskDesc" class="form-control" rows="3"></textarea>
+                            <textarea id="taskDesc" class="form-control" rows="3" placeholder="Görev detaylarını buraya yazın..."></textarea>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary w-100" onclick="saveTaskData()">Görevi Kaydet</button>
+                    <button type="button" class="btn btn-primary w-100 fw-bold" onclick="saveTaskData()">Görevi Kaydet</button>
                 </div>
             </div>
         </div>
@@ -336,7 +331,8 @@
     
     <script src="js/customers.js?v=1004"></script>
     <script src="js/customer_detail.js?v=1004"></script>
-    <script src="js/tasks.js?v=1005"></script> <script src="js/settings.js?v=1004"></script>
+    <script src="js/tasks.js?v=1005"></script>
+    <script src="js/settings.js?v=1004"></script>
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycby6vg7szzK1m5UTCeLC2s8J82dSShpj5HiVmGDu40KKqxlmZShGAoRCoa9j5TbTJeV2Lw/exec";
