@@ -1,183 +1,324 @@
-/**
- * CUSTOMERS.GS - 17 SÜTUN TAM UYUMLU SÜRÜM
- * Sütun Yapısı: A:ID, B:Ad, C:Tip, D:Ülke, E:Şehir, F:Tel, G:Eposta, H:Web, 
- * I:Adres, J:Ödeme, K:Nakliye, L:Durum, M:Notlar, N:Ol.Tar, O:Olusturan, P:Gun.Tar, Q:Guncelleyen
- */
-
-// 1. Müşteri Listesi (Dashboard Tablosu İçin)
-function getCustomerList() {
-  try {
-    const ss = SpreadsheetApp.openById(DB_ID);
-    const sheet = ss.getSheetByName("Musteriler");
-    if (!sheet) return { status: "error", message: "Musteriler tablosu bulunamadı!" };
-
-    const data = sheet.getDataRange().getValues();
-    const customers = [];
-
-    // Başlık hariç (1. satırdan başla)
-    for (let i = 1; i < data.length; i++) {
-      const row = data[i];
-      if(!row[0] || row[0] === "") continue; 
-
-      customers.push({
-        id: row[0],         // A: Musteri_ID
-        name: row[1],       // B: Firma_Adi
-        type: row[2],       // C: Tip
-        country: row[3],    // D: Ulke
-        city: row[4],       // E: Sehir
-        phone: row[5],      // F: Telefon
-        email: row[6],      // G: E_Posta
-        status: row[11],    // L: Durum
-        creator: row[14]    // O: Olusturan_Kullanici_ID
-      });
-    }
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pameks CRM - Yönetim Paneli</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     
-    // Yeni eklenenlerin en üstte görünmesi için listeyi ters çeviriyoruz
-    return { status: "success", data: customers.reverse() };
-  } catch (err) {
-    return { status: "error", message: "Liste çekme hatası: " + err.toString() };
-  }
-}
-
-// 2. Müşteri Detayı (Düzenleme ve Görüntüleme Ekranları İçin)
-function getCustomerDetail(id) {
-  try {
-    const ss = SpreadsheetApp.openById(DB_ID);
-    const sheet = ss.getSheetByName("Musteriler");
-    const data = sheet.getDataRange().getValues();
-
-    for (let i = 1; i < data.length; i++) {
-      const row = data[i];
-      if (row[0] == id) {
-        return {
-          status: "success",
-          data: {
-            id: row[0],         // A: Musteri_ID
-            name: row[1],       // B: Firma_Adi
-            type: row[2],       // C: Tip
-            country: row[3],    // D: Ulke
-            city: row[4],       // E: Sehir
-            phone: row[5],      // F: Telefon
-            email: row[6],      // G: E_Posta
-            website: row[7],    // H: Web_Sitesi
-            address: row[8],    // I: Adres
-            payment: row[9],    // J: Odeme_Sekli
-            shipping: row[10],  // K: Nakliye_Tipi
-            status: row[11],    // L: Durum
-            notes: row[12]      // M: Not_Ozet
-          }
-        };
-      }
-    }
-    return { status: "error", message: "Müşteri bulunamadı." };
-  } catch (err) {
-    return { status: "error", message: "Detay hatası: " + err.toString() };
-  }
-}
-
-// 3. Müşteri Kaydet (EKLEME ve GÜNCELLEME)
-function saveCustomer(data) {
-  try {
-    const ss = SpreadsheetApp.openById(DB_ID);
-    const sheet = ss.getSheetByName("Musteriler");
-    const rows = sheet.getDataRange().getValues();
-    const now = new Date();
-    const currentUser = data.user || "Admin"; 
-    
-    // A. GÜNCELLEME (ID varsa)
-    if (data.id && data.id !== "" && data.id !== "new") {
-      for (let i = 1; i < rows.length; i++) {
-        if (rows[i][0] == data.id) {
-          // B (2) sütunundan M (13) sütununa kadar (Toplam 12 sütunluk veri seti)
-          sheet.getRange(i + 1, 2, 1, 12).setValues([[
-            data.name,      // B: Firma_Adi
-            data.type,      // C: Tip
-            data.country,   // D: Ulke
-            data.city,      // E: Sehir
-            data.phone,     // F: Telefon
-            data.email,     // G: E_Posta
-            data.website,   // H: Web_Sitesi
-            data.address,   // I: Adres
-            data.payment,   // J: Odeme_Sekli
-            data.shipping,  // K: Nakliye_Tipi
-            data.status,    // L: Durum
-            data.notes      // M: Not_Ozet
-          ]]);
-
-          // P (16) ve Q (17) Sütunları -> Güncelleme Tarihi ve Guncelleyen
-          sheet.getRange(i + 1, 16, 1, 2).setValues([[now, currentUser]]);
-
-          return { status: "success", message: "Müşteri bilgileri güncellendi." };
+    <script>
+        // TOKEN KONTROLÜ
+        if (!sessionStorage.getItem('crmToken')) {
+            window.location.href = 'index.html';
         }
-      }
-      return { status: "error", message: "Güncellenecek kayıt bulunamadı." };
-    } 
+    </script>
+
+    <style>
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
+        #loadingOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5); z-index: 11000;
+            display: none; justify-content: center; align-items: center;
+            backdrop-filter: blur(4px);
+        }
+        .spinner-box {
+            background: white; padding: 20px 40px; border-radius: 10px;
+            text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .sidebar { width: 250px; background: #212529; color: #fff; position: fixed; height: 100vh; transition: 0.3s; z-index: 1050; left: 0; }
+        .sidebar.closed { left: -250px; }
+        .menu-link { display: block; padding: 15px 20px; color: #adb5bd; text-decoration: none; border-left: 4px solid transparent; cursor: pointer; }
+        .menu-link:hover, .menu-link.active { background: #343a40; color: #fff; border-left-color: #0d6efd; }
+        .menu-link i { width: 25px; text-align: center; margin-right: 10px; }
+        .main-content { margin-left: 250px; padding: 20px; transition: 0.3s; }
+        .main-content.expanded { margin-left: 0; }
+        @media (max-width: 768px) {
+            .sidebar { left: -250px; }
+            .sidebar.active { left: 0; }
+            .main-content { margin-left: 0; padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loadingOverlay">
+        <div class="spinner-box">
+            <div class="spinner-border text-primary mb-2" role="status"></div>
+            <div class="fw-bold text-dark">İşlem Yapılıyor...</div>
+        </div>
+    </div>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="p-3 text-center border-bottom border-secondary bg-dark">
+            <h5 class="m-0 fw-bold">Pameks CRM</h5>
+        </div>
+        <div class="mt-3">
+            <a onclick="loadModule('customers')" class="menu-link active" id="nav-customers">
+                <i class="fas fa-building"></i> Müşteriler
+            </a>
+            <a onclick="loadModule('settings')" class="menu-link" id="nav-settings">
+                <i class="fas fa-cog"></i> Sistem Ayarları
+            </a>
+            <hr class="border-secondary mx-3">
+            <a onclick="logout()" class="menu-link text-danger">
+                <i class="fas fa-sign-out-alt"></i> Çıkış Yap
+            </a>
+        </div>
+    </nav>
+
+    <main class="main-content" id="mainContent">
+        <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm sticky-top">
+            <button class="btn btn-outline-dark border-0" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <h6 class="m-0 fw-bold text-secondary" id="pageTitle">Yönetim Paneli</h6>
+            <div class="d-flex align-items-center">
+                <span id="userNameDisplay" class="fw-bold small me-2">Yükleniyor...</span>
+                <i class="fas fa-user-circle fa-2x text-primary"></i>
+            </div>
+        </div>
+        <div id="dynamicContent"></div>
+    </main>
+
+    <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog border-0">
+            <div class="modal-content shadow">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold">Kullanıcı Kartı</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="userForm">
+                        <input type="hidden" id="userId">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Ad Soyad</label>
+                            <input type="text" class="form-control" id="uName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Kullanıcı Adı</label>
+                            <input type="text" class="form-control" id="uUsername" required autocomplete="username">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Şifre</label>
+                            <input type="password" class="form-control" id="uPassword" placeholder="Değiştirmek istemiyorsanız boş bırakın" autocomplete="new-password">
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label small fw-bold">Rol</label>
+                                <select class="form-select" id="uRole">
+                                    <option value="personel">Personel</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label small fw-bold">Durum</label>
+                                <select class="form-select" id="uStatus">
+                                    <option value="Aktif">Aktif</option>
+                                    <option value="Pasif">Pasif</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-primary px-4" onclick="saveUserData()">Kaydet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="customerDetailModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold" id="modalTitle">Müşteri Formu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="customerForm">
+                        <input type="hidden" id="custId">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Firma Adı *</label>
+                                <input type="text" class="form-control" id="custName" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Tip</label>
+                                <select class="form-select" id="custType"></select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Durum</label>
+                                <select class="form-select" id="custStatus">
+                                    <option value="Aktif">Aktif</option>
+                                    <option value="Pasif">Pasif</option>
+                                    <option value="Aday">Aday</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Ülke</label>
+                                <input type="text" class="form-control" id="custCountry">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Şehir</label>
+                                <input type="text" class="form-control" id="custCity">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Telefon</label>
+                                <input type="tel" class="form-control" id="custPhone">
+                            </div>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">E-Posta</label>
+                                <input type="email" class="form-control" id="custEmail">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Web Sitesi</label>
+                                <input type="url" class="form-control" id="custWeb">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Adres</label>
+                            <textarea class="form-control" id="custAddress" rows="2"></textarea>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Ödeme Şekli</label>
+                                <select class="form-select" id="custPayment"></select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Nakliye Tipi</label>
+                                <select class="form-select" id="custShipping"></select>
+                            </div>
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label small fw-bold">Not Özeti</label>
+                            <textarea class="form-control" id="custNotes" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                    <button type="button" class="btn btn-primary px-4" id="btnSaveCustomer" onclick="saveCustomerData()">Kaydet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="contactModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow border-0">
+                <div class="modal-header">
+                    <h6 class="modal-title fw-bold">Kişi Bilgileri</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="contactForm">
+                        <input type="hidden" id="contId">
+                        <div class="mb-2">
+                            <label class="small fw-bold">Ad Soyad *</label>
+                            <input type="text" id="contName" class="form-control" required>
+                        </div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="small fw-bold">Departman</label>
+                                <input type="text" id="contDept" class="form-control">
+                            </div>
+                            <div class="col-6">
+                                <label class="small fw-bold">Ünvan</label>
+                                <input type="text" id="contTitle" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="small fw-bold">Telefon</label>
+                                <input type="tel" id="contPhone" class="form-control">
+                            </div>
+                            <div class="col-6">
+                                <label class="small fw-bold">E-Posta</label>
+                                <input type="email" id="contEmail" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="small fw-bold">Birincil</label>
+                                <select id="contPrimary" class="form-select">
+                                    <option value="Hayır">Hayır</option>
+                                    <option value="Evet">Evet</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="small fw-bold">Durum</label>
+                                <select id="contStatus" class="form-select">
+                                    <option value="Aktif">Aktif</option>
+                                    <option value="Pasif">Pasif</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary w-100" onclick="saveContactData()">Kişiyi Kaydet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-    // B. YENİ EKLEME (ID yoksa)
-    else {
-      const newId = "CUST-" + now.getTime();
-      const newRow = [
-        newId,           // A: Musteri_ID (1)
-        data.name,       // B: Firma_Adi (2)
-        data.type,       // C: Tip (3)
-        data.country,    // D: Ulke (4)
-        data.city,       // E: Sehir (5)
-        data.phone,      // F: Telefon (6)
-        data.email,      // G: E_Posta (7)
-        data.website,    // H: Web_Sitesi (8)
-        data.address,    // I: Adres (9)
-        data.payment,    // J: Odeme_Sekli (10)
-        data.shipping,   // K: Nakliye_Tipi (11)
-        data.status,     // L: Durum (12)
-        data.notes,      // M: Not_Ozet (13)
-        now,             // N: Olusturma_Tarihi (14)
-        currentUser,     // O: Olusturan_Kullanici_ID (15)
-        now,             // P: Guncelleme_Tarihi (16)
-        currentUser      // Q: Guncelleyen_Kullanici_ID (17)
-      ];
+    <script src="js/customers.js?v=1004"></script>
+    <script src="js/customer_detail.js?v=1004"></script>
+    <script src="js/settings.js?v=1004"></script>
 
-      sheet.appendRow(newRow);
-      return { status: "success", message: "Yeni müşteri başarıyla eklendi." };
-    }
-  } catch (err) {
-    return { status: "error", message: "Kaydetme hatası: " + err.toString() };
-  }
-}
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycby6vg7szzK1m5UTCeLC2s8J82dSShpj5HiVmGDu40KKqxlmZShGAoRCoa9j5TbTJeV2Lw/exec";
+        const currentUser = JSON.parse(sessionStorage.getItem('crmUser'));
+        
+        if(currentUser) { 
+            document.getElementById('userNameDisplay').innerText = currentUser.name + " (" + currentUser.role + ")"; 
+        }
 
-// 4. Müşteri Silme (GÜVENLİK KONTROLLÜ)
-function deleteCustomer(id) {
-  try {
-    const ss = SpreadsheetApp.openById(DB_ID);
-    
-    // İlişkili tablo kontrolleri (Korumalı Silme)
-    if (hasRelatedRecord(ss, "Ilgili_Kisiler", 1, id)) 
-      return { status: "error", message: "Silinemez! Bu müşteriye bağlı 'Kişiler' var." };
-      
-    if (hasRelatedRecord(ss, "Gorevler", 1, id)) 
-      return { status: "error", message: "Silinemez! Bu müşteriye bağlı 'Görevler' var." };
+        function loadModule(moduleName) {
+            if (window.innerWidth < 768) document.getElementById('sidebar').classList.remove('active');
+            document.querySelectorAll('.menu-link').forEach(el => el.classList.remove('active'));
+            document.getElementById('nav-' + moduleName).classList.add('active');
+            
+            if (moduleName === 'customers') loadCustomersModule();
+            if (moduleName === 'settings') loadSettingsModule();
+        }
 
-    const sheet = ss.getSheetByName("Musteriler");
-    const data = sheet.getDataRange().getValues();
+        function toggleSidebar() {
+            const s = document.getElementById('sidebar');
+            const m = document.getElementById('mainContent');
+            if (window.innerWidth < 768) { 
+                s.classList.toggle('active'); 
+            } else { 
+                s.classList.toggle('closed'); 
+                m.classList.toggle('expanded'); 
+            }
+        }
 
-    for (let i = 1; i < data.length; i++) {
-      if (data[i][0] == id) {
-        sheet.deleteRow(i + 1);
-        return { status: "success", message: "Müşteri başarıyla silindi." };
-      }
-    }
-    return { status: "error", message: "Kayıt bulunamadı." };
-  } catch (err) {
-    return { status: "error", message: "Silme hatası: " + err.toString() };
-  }
-}
+        function logout() { 
+            Swal.fire({
+                title: 'Çıkış',
+                text: "Oturumu kapatmak istediğinize emin misiniz?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Evet',
+                cancelButtonText: 'Hayır'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    sessionStorage.clear(); 
+                    window.location.href = 'index.html'; 
+                }
+            });
+        }
 
-// YARDIMCI: İlişkili tablo kontrolü
-function hasRelatedRecord(ss, sheetName, colIndex, searchId) {
-  const sheet = ss.getSheetByName(sheetName);
-  if (!sheet) return false; 
-  const data = sheet.getDataRange().getValues();
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][colIndex] == searchId) return true;
-  }
-  return false; 
-}
+        // İLK YÜKLEME
+        document.addEventListener('DOMContentLoaded', () => loadModule('customers'));
+    </script>
+</body>
+</html>
