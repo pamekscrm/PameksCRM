@@ -1,15 +1,12 @@
 /**
- * js/customers.js - TAM KOD
- * Liste yükleme ve Creator (Olusturan) sütunu entegreli sürüm
+ * js/customers.js - TAM SÜRÜM
  */
-
 let globalSettings = { Musteri_Tipleri: [], Odeme_Sekilleri: [], Nakliye_Tipleri: [] };
 
 function showLoading() { document.getElementById('loadingOverlay').style.display = 'flex'; }
 function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
 
 async function fetchSettings() {
-    // Veriyi JSON olarak göndermek daha sağlıklıdır
     const res = await fetch(API_URL, { 
         method: "POST", 
         body: JSON.stringify({ action: "getSettings" }) 
@@ -28,20 +25,12 @@ function populateSelect(selectId, items, selectedValue = "") {
         if(item === selectedValue) opt.selected = true;
         select.appendChild(opt);
     });
-    if (selectedValue && !items.includes(selectedValue)) {
-        const opt = document.createElement('option');
-        opt.value = selectedValue;
-        opt.innerText = selectedValue + " (Arşiv)";
-        opt.selected = true;
-        select.appendChild(opt);
-    }
 }
 
 async function loadCustomersModule() {
     await fetchSettings();
     const contentDiv = document.getElementById('dynamicContent');
-    const titleDiv = document.getElementById('pageTitle');
-    titleDiv.innerText = "Müşteri Listesi";
+    document.getElementById('pageTitle').innerText = "Müşteri Listesi";
     
     contentDiv.innerHTML = `
         <div class="content-card bg-white p-3 rounded shadow-sm">
@@ -80,7 +69,6 @@ async function fetchCustomers() {
     tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4"><div class="spinner-border text-primary"></div></td></tr>`;
 
     try {
-        // Liste çekilirken hem JSON hem URLSearchParams desteği için:
         const res = await fetch(API_URL, {
             method: "POST",
             body: JSON.stringify({ action: "getCustomers" }) 
@@ -108,9 +96,88 @@ async function fetchCustomers() {
             tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted p-4">Kayıt bulunamadı.</td></tr>`;
         }
     } catch (error) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger p-4">Veri çekme hatası: ${error.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger p-4">Hata: ${error.message}</td></tr>`;
     }
 }
 
-// Diğer fonksiyonlar (openCustomerDetail, saveCustomerData, deleteCustomerFunc) paylaştığınla aynı kalabilir.
-// Ancak fetch işlemlerinde body: JSON.stringify({...}) kullanımına dikkat et.
+async function openCustomerDetail(id) {
+    const modal = new bootstrap.Modal(document.getElementById('customerDetailModal'));
+    document.getElementById('customerForm').reset();
+    populateSelect('custType', globalSettings.Musteri_Tipleri);
+    populateSelect('custPayment', globalSettings.Odeme_Sekilleri);
+    populateSelect('custShipping', globalSettings.Nakliye_Tipleri);
+
+    if (id === 'new') {
+        document.getElementById('modalTitle').innerText = "Yeni Müşteri Ekle";
+        document.getElementById('custId').value = "";
+        modal.show();
+    } else {
+        document.getElementById('modalTitle').innerText = "Müşteri Düzenle";
+        showLoading();
+        const res = await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({ action: "getCustomerDetail", id: id })
+        }).then(r => r.json());
+        hideLoading();
+        if(res.status === 'success') {
+            const d = res.data;
+            document.getElementById('custId').value = d.id;
+            document.getElementById('custName').value = d.name;
+            document.getElementById('custStatus').value = d.status;
+            document.getElementById('custCountry').value = d.country;
+            document.getElementById('custCity').value = d.city;
+            document.getElementById('custPhone').value = d.phone;
+            document.getElementById('custEmail').value = d.email;
+            document.getElementById('custWeb').value = d.website;
+            document.getElementById('custAddress').value = d.address;
+            document.getElementById('custNotes').value = d.notes;
+            populateSelect('custType', globalSettings.Musteri_Tipleri, d.type);
+            populateSelect('custPayment', globalSettings.Odeme_Sekilleri, d.payment);
+            populateSelect('custShipping', globalSettings.Nakliye_Tipleri, d.shipping);
+            modal.show();
+        }
+    }
+}
+
+async function saveCustomerData() {
+    const name = document.getElementById('custName').value;
+    if(!name) return Swal.fire('Hata', 'Firma Adı zorunludur.', 'warning');
+    showLoading();
+    const payload = {
+        action: "saveCustomer",
+        id: document.getElementById('custId').value,
+        name: name,
+        type: document.getElementById('custType').value,
+        status: document.getElementById('custStatus').value,
+        country: document.getElementById('custCountry').value,
+        city: document.getElementById('custCity').value,
+        phone: document.getElementById('custPhone').value,
+        email: document.getElementById('custEmail').value,
+        website: document.getElementById('custWeb').value,
+        address: document.getElementById('custAddress').value,
+        payment: document.getElementById('custPayment').value,
+        shipping: document.getElementById('custShipping').value,
+        notes: document.getElementById('custNotes').value,
+        user: currentUser.name
+    };
+    const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) }).then(r => r.json());
+    hideLoading();
+    if(res.status === 'success') {
+        Swal.fire({ title: 'Başarılı', text: res.message, icon: 'success', timer: 2000, showConfirmButton: false });
+        bootstrap.Modal.getInstance(document.getElementById('customerDetailModal')).hide();
+        fetchCustomers();
+    } else {
+        Swal.fire('Hata', res.message, 'error');
+    }
+}
+
+async function deleteCustomerFunc(id) {
+    const result = await Swal.fire({ title: 'Emin misiniz?', text: "Müşteri silinecektir!", icon: 'warning', showCancelButton: true, confirmButtonText: 'Evet, Sil', cancelButtonText: 'İptal' });
+    if (result.isConfirmed) {
+        showLoading();
+        const res = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "deleteCustomer", id: id }) }).then(r => r.json());
+        hideLoading();
+        Swal.fire(res.status === 'success' ? 'Başarılı' : 'Hata', res.message, res.status);
+        if(res.status === 'success') fetchCustomers();
+    }
+}
