@@ -114,7 +114,7 @@ async function showCustomerDashboard(id) {
                                 <div class="table-responsive">
                                     <table class="table table-sm table-hover align-middle text-nowrap">
                                         <thead class="table-light small text-uppercase fw-bold">
-                                            <tr><th>No / Model</th><th>Kumaş</th><th class="text-primary">Talep</th><th class="text-danger">Teklif</th><th class="text-success">Onay</th><th>Sonuç</th><th class="text-end">İşlem</th></tr>
+                                            <tr><th>No / Model</th><th>Kumaş</th><th class="text-primary">Talep Fiyat (Müşteri)</th><th class="text-danger">Teklif Fiyat (Pameks)</th><th class="text-success">Onay Fiyat (Final)</th><th>Sonuç</th><th class="text-end">İşlem</th></tr>
                                         </thead>
                                         <tbody id="detailQuotationBody"></tbody>
                                     </table>
