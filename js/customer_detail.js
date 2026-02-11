@@ -1,5 +1,5 @@
 /**
- * js/customer_detail.js - MODERN DASHBOARD GÖRÜNÜMÜ
+ * js/customer_detail.js - MODERN DASHBOARD GÖRÜNÜMÜ & HATA DÜZELTİMLERİ
  */
 
 async function showCustomerDashboard(id) {
@@ -36,7 +36,7 @@ async function showCustomerDashboard(id) {
                         <div class="card-header bg-white fw-bold"><i class="fas fa-info-circle text-primary me-2"></i> Genel Bilgiler</div>
                         <div class="card-body">
                             <div class="d-flex justify-content-between border-bottom py-2"><span>Sektör/Tip:</span> <span class="fw-bold">${d.type || '-'}</span></div>
-                            <div class="d-flex justify-content-between border-bottom py-2"><span>Ödeme Şekli:</span> <span class="fw-bold text-muted">${d.payment || '-'}</span></div>
+                            <div class="d-flex justify-content-between border-bottom py-2"><span>Ödeme Şekli:</span> <span class="fw-bold text-muted small">${d.payment || '-'}</span></div>
                             <div class="d-flex justify-content-between py-2"><span>Durum:</span> <span class="badge bg-success">${d.status}</span></div>
                         </div>
                     </div>
@@ -46,7 +46,7 @@ async function showCustomerDashboard(id) {
                         <div class="card-header bg-white fw-bold"><i class="fas fa-phone text-primary me-2"></i> İletişim Bilgileri</div>
                         <div class="card-body">
                             <div class="d-flex justify-content-between border-bottom py-2"><span>Telefon:</span> <span class="fw-bold">${d.phone || '-'}</span></div>
-                            <div class="d-flex justify-content-between border-bottom py-2"><span>E-Posta:</span> <span class="fw-bold text-muted">${d.email || '-'}</span></div>
+                            <div class="d-flex justify-content-between border-bottom py-2"><span>E-Posta:</span> <span class="fw-bold text-muted small">${d.email || '-'}</span></div>
                             <div class="d-flex justify-content-between py-2"><span>Şehir/Ülke:</span> <span class="fw-bold">${d.city || '-'}/${d.country || '-'}</span></div>
                         </div>
                     </div>
@@ -79,13 +79,15 @@ async function showCustomerDashboard(id) {
                         </div>
                     </div>
                 </div>
-            </div>`;
+            </div>
+            <input type="hidden" id="dashboardCustId" value="${d.id}">`; // Müşteri ID'sini saklamak için kritik
         fetchDetailContacts(d.id);
     } catch (e) { console.error(e); } finally { hideLoading(); }
 }
 
 async function fetchDetailContacts(customerId) {
     const b = document.getElementById('detailContactBody');
+    if(!b) return;
     b.innerHTML = '<tr><td colspan="6" class="text-center py-3">Yükleniyor...</td></tr>';
     const res = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "getContacts", customerId: customerId }) }).then(r => r.json());
     b.innerHTML = "";
@@ -98,8 +100,8 @@ async function fetchDetailContacts(customerId) {
                 <td><small>${c.phone || ''}<br>${c.email || ''}</small></td>
                 <td class="text-center">${c.isPrimary === 'Evet' ? '⭐' : '-'}</td>
                 <td class="text-end">
-                    <button class="btn btn-sm btn-link me-1" onclick='editContact(${JSON.stringify(c)})'><i class="fas fa-pencil-alt"></i></button>
-                    <button class="btn btn-sm btn-link text-danger" onclick="deleteContactFunc('${c.id}', '${c.customerId}')"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-sm btn-link me-1" onclick='editContact(${JSON.stringify(c)})'><i class="fas fa-pencil-alt text-primary"></i></button>
+                    <button class="btn btn-sm btn-link text-danger" onclick="deleteContactFunc('${c.id}', '${c.customerId}')"><i class="fas fa-trash text-danger"></i></button>
                 </td>
             </tr>`;
         });
@@ -125,15 +127,15 @@ function editContact(c) {
 }
 
 async function saveContactData() {
-    const custId = document.getElementById('custId').value;
+    const custId = document.getElementById('dashboardCustId').value;
     const p = { 
         action: "saveContact", 
-        currentUser: currentUser, 
+        currentUser: currentUser.name, 
         contactData: { 
             id: document.getElementById('contId').value, 
             customerId: custId, 
             name: document.getElementById('contName').value, 
-            department: document.getElementById('contDept').value, 
+            department: document.getElementById('contDept').value, // Artık HTML'de var, hata vermez
             title: document.getElementById('contTitle').value, 
             phone: document.getElementById('contPhone').value, 
             email: document.getElementById('contEmail').value, 
@@ -141,12 +143,16 @@ async function saveContactData() {
             status: document.getElementById('contStatus').value 
         } 
     };
+
+    if(!p.contactData.name) return Swal.fire("Hata", "Ad Soyad alanı zorunludur.", "warning");
+
     showLoading();
     const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(p) }).then(r => r.json());
     hideLoading();
     if(res.status === 'success') {
         bootstrap.Modal.getInstance(document.getElementById('contactModal')).hide();
         fetchDetailContacts(custId);
+        Swal.fire({ icon: 'success', title: 'Başarılı', text: res.message, timer: 1500, showConfirmButton: false });
     }
 }
 
