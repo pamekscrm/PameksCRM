@@ -111,7 +111,7 @@ async function showCustomerDashboard(id) {
 }
 
 /**
- * TEKLİFLERİ LİSTELEME (ÜÇLÜ FİYAT GÜNCELLEMESİ)
+ * TEKLİFLERİ LİSTELEME
  */
 async function fetchDetailQuotations(customerId) {
     const container = document.getElementById('tab-quotations');
