@@ -1,5 +1,5 @@
 /**
- * js/customer_detail.js - MODERNIZE, BİRİNCİL SÜTUNU VE GÖREV ENTEGRASYONU TAM SÜRÜM
+ * js/customer_detail.js - NOTLAR SEKMESİ ENTEGRE EDİLMİŞ TAM SÜRÜM
  */
 
 async function showCustomerDashboard(id) {
@@ -63,12 +63,15 @@ async function showCustomerDashboard(id) {
                                 <li class="nav-item">
                                     <button class="nav-link py-3 px-4 fw-bold" id="tasks-tab-btn" data-bs-toggle="tab" data-bs-target="#tab-tasks" onclick="fetchDetailTasks('${d.id}')">Görevler</button>
                                 </li>
+                                <li class="nav-item">
+                                    <button class="nav-link py-3 px-4 fw-bold" id="notes-tab-btn" data-bs-toggle="tab" data-bs-target="#tab-notes" onclick="fetchDetailNotes('${d.id}')">Notlar</button>
+                                </li>
                             </ul>
                         </div>
                         <div class="card-body p-4 tab-content">
                             <div class="tab-pane fade show active" id="tab-contacts">
                                 <div class="d-flex justify-content-between mb-3 align-items-center">
-                                    <h6 class="m-0 fw-bold text-dark">Kayıtlı İnsanlar</h6>
+                                    <h6 class="m-0 fw-bold text-dark">İlgili Kişiler</h6>
                                     <button class="btn btn-sm btn-primary" onclick="openContactModal('new')"><i class="fas fa-user-plus me-1"></i> Yeni Kişi</button>
                                 </div>
                                 <div class="table-responsive">
@@ -88,6 +91,8 @@ async function showCustomerDashboard(id) {
                                 </div>
                             </div>
                             <div class="tab-pane fade" id="tab-tasks">
+                                </div>
+                            <div class="tab-pane fade" id="tab-notes">
                                 </div>
                         </div>
                     </div>
@@ -113,7 +118,6 @@ async function fetchDetailContacts(customerId) {
         b.innerHTML = "";
         if(res.status === "success" && res.data.length > 0) {
             res.data.forEach(c => {
-                // EŞLEŞME KONTROLÜ: Sayfadaki değeri 'Evet' ise yıldız koyuyoruz
                 const isPrimary = String(c.isPrimary).trim() === "Evet";
                 const primaryTag = isPrimary 
                     ? '<span class="badge bg-warning text-dark"><i class="fas fa-star me-1"></i>Evet</span>' 
