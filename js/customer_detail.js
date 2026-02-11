@@ -1,5 +1,5 @@
 /**
- * js/customer_detail.js - BİRİNCİL SÜTUNU VE KULLANICI ADI DÜZELTİLMİŞ TAM SÜRÜM
+ * js/customer_detail.js - MODERNIZE, BİRİNCİL SÜTUNU VE GÖREV ENTEGRASYONU TAM SÜRÜM
  */
 
 async function showCustomerDashboard(id) {
@@ -57,14 +57,18 @@ async function showCustomerDashboard(id) {
                     <div class="card border-0 shadow-sm">
                         <div class="card-header bg-white p-0">
                             <ul class="nav nav-tabs border-bottom-0" id="detailTabs" role="tablist">
-                                <li class="nav-item"><button class="nav-link active py-3 px-4 fw-bold" id="contacts-tab-btn" data-bs-toggle="tab" data-bs-target="#tab-contacts" onclick="fetchDetailContacts('${d.id}')">İlgili Kişiler</button></li>
-                                <li class="nav-item"><button class="nav-link py-3 px-4 fw-bold" id="tasks-tab-btn" data-bs-toggle="tab" data-bs-target="#tab-tasks">Görevler</button></li>
+                                <li class="nav-item">
+                                    <button class="nav-link active py-3 px-4 fw-bold" id="contacts-tab-btn" data-bs-toggle="tab" data-bs-target="#tab-contacts" onclick="fetchDetailContacts('${d.id}')">İlgili Kişiler</button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link py-3 px-4 fw-bold" id="tasks-tab-btn" data-bs-toggle="tab" data-bs-target="#tab-tasks" onclick="fetchDetailTasks('${d.id}')">Görevler</button>
+                                </li>
                             </ul>
                         </div>
                         <div class="card-body p-4 tab-content">
                             <div class="tab-pane fade show active" id="tab-contacts">
                                 <div class="d-flex justify-content-between mb-3 align-items-center">
-                                    <h6 class="m-0 fw-bold text-dark">Kayıtlı Kişiler</h6>
+                                    <h6 class="m-0 fw-bold text-dark">Kayıtlı İnsanlar</h6>
                                     <button class="btn btn-sm btn-primary" onclick="openContactModal('new')"><i class="fas fa-user-plus me-1"></i> Yeni Kişi</button>
                                 </div>
                                 <div class="table-responsive">
@@ -83,7 +87,8 @@ async function showCustomerDashboard(id) {
                                     </table>
                                 </div>
                             </div>
-                            <div class="tab-pane fade text-center py-5 text-muted" id="tab-tasks">İşlem kayıtları buraya gelecek.</div>
+                            <div class="tab-pane fade" id="tab-tasks">
+                                </div>
                         </div>
                     </div>
                 </div>
@@ -178,7 +183,7 @@ async function saveContactData() {
             body: JSON.stringify({ 
                 action: "saveContact", 
                 contactData: contactObj, 
-                currentUser: currentUser // Nesne olarak gönderiyoruz, Main.gs name'i ayıklayacak
+                currentUser: currentUser 
             }) 
         }).then(r => r.json());
 
